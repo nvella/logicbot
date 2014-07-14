@@ -1,4 +1,4 @@
 logicbot
 ========
 
-Logic processing bot for Craft
+Logicbot is a processing bot for Craft. TODO fill this in.
