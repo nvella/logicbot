@@ -145,7 +145,7 @@ module Logicbot
               set_block *pos, @objects[pos].metadata
               Logicbot.log "Toggled object at #{pos.join(' ')}."
             else # Something else, remove object
-              @tick_mutex.synchronize { @objects.delete [x, y, z] }
+              @tick_mutex.synchronize { @objects.delete pos }
               send_chat_message "deleted object at #{pos.join(' ')}."
             end
           end
@@ -164,7 +164,7 @@ module Logicbot
                 send_chat_message "error: no object exists at #{pos.join(' ')}."
               end
             when 'info' # Player wants info on object
-              if @objects[[x, y, z]] != nil then
+              if @objects[pos] != nil then
                 send_chat_message "info for object at #{pos.join(' ')}.\nTYPE(#{@objects[pos].class.to_s.split(':')[-1].downcase}) IN(#{@objects[pos].in_channels.join(' ')}) OUT(#{@objects[pos].out_channel})"
               else
                 send_chat_message "error: no object exists at #{pos.join(' ')}."
