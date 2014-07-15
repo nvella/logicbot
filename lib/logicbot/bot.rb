@@ -94,8 +94,8 @@ module Logicbot
       Logicbot.log "#{NAME} version #{VERSION} starting..."
       if File.exists? 'logicbot_state.json' then
         load_from_file 'logicbot_state.json'
+        Logicbot.log "Loaded state."        
       end
-      Logicbot.log "Loaded state."
       authenticate
       @tick_thread = Thread.new {tick_thread}
       Signal.trap('SIGINT') {Logicbot.log 'Quitting...'; @tcp.close; save_to_file 'logicbot_state.json'; exit}
