@@ -179,9 +179,9 @@ module Logicbot
               if Objects::TYPES[sign_data[1]] != nil then # Check if object type exists
                 # Check the parameters
                 parameters = sign_data[2 .. 4]
-                if parameters.length < Objects::TYPES[sign_data[1]]::PARAMS then
+                if !(parameters.length >= Objects::TYPES[sign_data[1]]::PARAMS or (parameters.length >= (Objects::TYPES[sign_data[1]]::PARAMS - 1) and Objects::TYPES[sign_data[1]]::PARAM_FORMAT[1] > 0)) then
                   param_format = Objects::TYPES[sign_data[1]]::PARAM_FORMAT
-                  send_chat_message "error: object type `#{sign_data[1]}' expects parameters in format #{'input ' * param_format[0]}#{'output' * param_format[1]}"
+                  send_chat_message "error: object type `#{sign_data[1]}' expects parameters in format #{'input ' * param_format[0]}[#{'output' * param_format[1]}]"
                 elsif @objects[pos] != nil then
                   send_chat_message "error: an object already exists at #{pos.join(' ')}."
                 else
@@ -190,8 +190,10 @@ module Logicbot
                   if block_id == nil then
                     send_chat_message "error: internal server error. please try again."
                   else
+                    parameters = parameters.map {|channel| resolve_channel pos, channel}
+                  
                     @tick_mutex.synchronize do
-                      Objects::TYPES[sign_data[1]]::PARAMS.times {|i| prepare_channel parameters[i]} # Prepare the channels
+                      parameters.each {|channel| prepare_channel channel} # Prepare the channels
                     end
                     
                     param_format = Objects::TYPES[sign_data[1]]::PARAM_FORMAT
@@ -203,7 +205,14 @@ module Logicbot
                     end
                     
                     if param_format[1] > 0 then
-                      out_channel = parameters[param_format[0]]
+                      if parameters[param_format[0]] == nil then
+                        # Create the block output channel
+                        out_channel = pos.join(',')
+                        prepare_channel pos.join(',')
+                      else
+                        # Use output channel provided
+                        out_channel = parameters[param_format[0]]
+                      end
                     end
                     
                     @tick_mutex.synchronize do
@@ -292,6 +301,9 @@ module Logicbot
           buffer = ''
           @objects.each do |pos, obj| # Process each object that needs an update
             if obj.needs_update then
+              @channels['t'] = true  # dirty hack here
+              @channels['f'] = false # dirty hack there
+            
               obj.needs_update = false
               obj.update
             end
@@ -338,5 +350,25 @@ module Logicbot
     def toggle_channel channel
       @channels[channel] = !@channels[channel]
     end
+    
+      
+    def resolve_channel pos, channel_name
+      case channel_name.downcase
+      when 'u', 't'
+        return [pos[0], pos[1] + 1, pos[2]].join(',')
+      when 'd', 'b'
+        return [pos[0], pos[1] - 1, pos[2]].join(',')
+      when 'n'
+        return [pos[0] + 1, pos[1], pos[2]].join(',')
+      when 's'
+        return [pos[0] - 1, pos[1], pos[2]].join(',')
+      when 'e'
+        return [pos[0], pos[1], pos[2] + 1].join(',')
+      when 'w'
+        return [pos[0], pos[1], pos[2] - 1].join(',')
+      else
+        return channel_name
+      end
+    end    
   end
 end
