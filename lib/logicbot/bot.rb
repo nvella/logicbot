@@ -133,25 +133,27 @@ module Logicbot
         when 'B' # Block break/place
           pos = [data[3].to_i, data[4].to_i, data[5].to_i] # Create the position data
           id = data[6].to_i
-          if data[1].to_i != pos[0] / CHUNK_SIZE or data[2].to_i != pos[2] / CHUNK_SIZE then next end # Ignore double notifies
-
-          @block_cache[pos] = id
+          if data[1].to_i != pos[0] / CHUNK_SIZE or data[2].to_i != pos[2] / CHUNK_SIZE then next end # Ignore double notifies      
 
           # If block change was a break and there was an object at the location
           if id == 0 and @objects[pos] != nil then
-            case @objects[pos]
-            when Objects::Toggle # Take special action if the object was a toggle
+            if @objects[pos].class == Objects::Toggle then # Take special action if the object was a toggle
               @tick_mutex.synchronize do
                 toggle_channel @objects[pos].out_channel
                 mark_channel_for_update @objects[pos].out_channel
               end
-              @block_cache[pos] = @objects[pos].metadata
-              set_block *pos, @objects[pos].metadata
-              Logicbot.log "Toggled object at #{pos.join(' ')}."
-            else # Something else, remove object
-              @tick_mutex.synchronize { @objects.delete pos }
-              send_chat_message "deleted object at #{pos.join(' ')}."
+              Logicbot.log "Toggled object at #{pos.join(' ')}."              
             end
+
+            set_block *pos, @objects[pos].metadata
+
+            @objects[pos].signs.each_with_index do |sign, facing|
+              if sign.length > 0 then
+                set_sign *pos, facing, sign
+              end
+            end
+          else
+            @block_cache[pos] = id
           end
         when 'S' # Sign
           pos = [data[3].to_i, data[4].to_i, data[5].to_i] # Create the position data
@@ -183,37 +185,33 @@ module Logicbot
                 elsif @objects[pos] != nil then
                   send_chat_message "error: an object already exists at #{pos.join(' ')}."
                 else
-                  case sign_data[1]
-                  when 'toggle' # If placing a toggle, take special action fill out the metadata correctly
-                    block_id = get_block_at *pos
-                    if block_id == nil then
-                      send_chat_message "error: internal server error. please try again."
-                    else
-                      @tick_mutex.synchronize do
-                        prepare_channel parameters[0] # Prepare the output channel
-                        @objects[pos] = Objects::Toggle.new self, pos, [], parameters[0], false, block_id
-                      end
-                      send_chat_message "`#{sign_data[1]}' object created at #{pos.join(' ')}."
-                    end
-                  else # Otherwise, do generic actions.
+                  block_id = get_block_at *pos
+                  if block_id == nil then
+                    send_chat_message "error: internal server error. please try again."
+                  else
                     @tick_mutex.synchronize do
                       Objects::TYPES[sign_data[1]]::PARAMS.times {|i| prepare_channel parameters[i]} # Prepare the channels
                     end
+                    
                     param_format = Objects::TYPES[sign_data[1]]::PARAM_FORMAT
                     in_channels = []
                     out_channel = nil
+                    
                     if param_format[0] > 0 then
                       in_channels = parameters[0 .. (param_format[0] - 1)]
                     end
+                    
                     if param_format[1] > 0 then
                       out_channel = parameters[param_format[0]]
                     end
+                    
                     @tick_mutex.synchronize do
-                      @objects[pos] = Objects::TYPES[sign_data[1]].new self, pos, in_channels, out_channel, true
+                      @objects[pos] = Objects::TYPES[sign_data[1]].new self, pos, in_channels, out_channel, true, block_id
                     end
+                    
+                    6.times {|i| set_sign *pos, i, ''} # Clear all the signs on this block so we can keep update with new changes
                     send_chat_message "`#{sign_data[1]}' object created at #{pos.join(' ')}."
                   end
-                  6.times {|i| set_sign *pos, i, ''} # Clear all the signs on this block so we can keep update with new changes
                 end
               else
                 send_chat_message "error: logic object type `#{sign_data[1]}' does not exist.\nvalid values are: #{Objects::TYPES.keys.join(' ')}" 
