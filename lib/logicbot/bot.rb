@@ -354,9 +354,9 @@ module Logicbot
       
     def resolve_channel pos, channel_name
       case channel_name.downcase
-      when 'u', 't'
+      when 'u'
         return [pos[0], pos[1] + 1, pos[2]].join(',')
-      when 'd', 'b'
+      when 'd'
         return [pos[0], pos[1] - 1, pos[2]].join(',')
       when 'n'
         return [pos[0] + 1, pos[1], pos[2]].join(',')
