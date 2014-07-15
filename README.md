@@ -1,7 +1,7 @@
 logicbot
 ========
 
-Logicbot is a logic processing bot for Craft. It provides basic logic building blocks that allow players to create both simple and complex machines. Logicbot is currently in Alpha.
+Logicbot is a logic processing bot for [Craft](http://www.michaelfogleman.com/craft/). It provides basic logic building blocks that allow players to create both simple and complex machines. Logicbot is currently in Alpha.
 
 Basic usage
 -----------
