@@ -92,7 +92,9 @@ module Logicbot
     
     def run
       Logicbot.log "#{NAME} version #{VERSION} starting..."
-      load_from_file 'logicbot_state.json'
+      if File.exists? 'logicbot_state.json' then
+        load_from_file 'logicbot_state.json'
+      end
       Logicbot.log "Loaded state."
       authenticate
       @tick_thread = Thread.new {tick_thread}
