@@ -41,4 +41,4 @@ Logicbot will respond to the following strings when said in chat.
 
   - ``.logicbot debug CHANNEL_NAME`` Returns the state of the channel CHANNEL_NAME.
 
-.
+
