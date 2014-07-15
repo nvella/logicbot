@@ -165,7 +165,7 @@ module Logicbot
               end
             when 'info' # Player wants info on object
               if @objects[pos] != nil then
-                send_chat_message "info for object at #{pos.join(' ')}.\nTYPE(#{@objects[pos].class.to_s.split(':')[-1].downcase}) IN(#{@objects[pos].in_channels.join(' ')}) OUT(#{@objects[pos].out_channel})"
+                send_chat_message "info for object at #{pos.join(' ')}.\nTYPE(#{@objects[pos].class.to_s.split(':')[-1].downcase}) IN(#{@objects[pos].in_channels.join(' ').rstrip}) OUT(#{@objects[pos].out_channel})"
               else
                 send_chat_message "error: no object exists at #{pos.join(' ')}."
               end
