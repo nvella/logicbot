@@ -16,11 +16,11 @@ Logicbot deals with **objects** and **channels**. Objects modify channels based 
   - **xor** 2 inputs, 1 output (Sets the state of the output channel to true *only if the state of one* input channel is true)
   - **indicator** 1 input, 0 outputs (Sets the block the object is placed on to either a green block or a red block depending on the state of the input channel)
 
-To use these objects, place a sign on a block with the contents
+To use these objects, place a sign on the block you want to add a logic object to with the contents
 
   `` `logic OBJECT_TYPE OBJECT_PARAMS ``
 
-where ``OBJECT_TYPE`` is the name of the object type shown above and ``OBJECT_PARAMS`` are the input and output channels, in that order, separated by spaces.
+where ``OBJECT_TYPE`` is the name of an object type shown above and ``OBJECT_PARAMS`` are the input and output channels, in that order, separated by spaces.
 
 An example for an AND object that changes the state of myOutput if myInput1 and myInput2 are true will look like this:
 
