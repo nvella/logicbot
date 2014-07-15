@@ -18,21 +18,21 @@ Logicbot deals with **objects** and **channels**. Objects modify channels based 
 
 To use these objects, place a sign on a block with the contents
 
-  ```logic OBJECT_TYPE OBJECT_PARAMS``
+  `` `logic OBJECT_TYPE OBJECT_PARAMS ``
 
 where ``OBJECT_TYPE`` is the name of the object type shown above and ``OBJECT_PARAMS`` are the input and output channels, in that order, separated by spaces.
 
 An example for an AND object that changes the state of myOutput if myInput1 and myInput2 are true will look like this:
 
-  ```logic and myInput1 myInput2 myOutput``
+  `` `logic and myInput1 myInput2 myOutput ``
 
 To delete an object, simply place a sign on it with the contents;
 
-  ```logic delete``
+  `` `logic delete ``
 
 And to retrieve information about an object, place a sign on it with the contents;
 
-  ```logic info``
+  `` `logic info ``
 
 Chat commands
 -------------
@@ -41,4 +41,4 @@ Logicbot will respond to the following strings when said in chat.
 
   - ``.logicbot debug CHANNEL_NAME`` Returns the state of the channel CHANNEL_NAME.
 
-
+.
