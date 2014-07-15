@@ -17,6 +17,8 @@
 module Logicbot
   module Objects 
     class Base
+      COLOUR = nil # A COLOUR value of nil means no block replace.
+    
       attr_accessor :in_channels, :out_channel, :needs_update, :metadata, :signs
       def initialize bot, pos, in_channels, out_channel, needs_update = false, metadata = 0
         @bot = bot
@@ -51,6 +53,7 @@ module Logicbot
       ID = 2
       PARAMS = 3
       PARAM_FORMAT = [2, 1]
+      COLOUR = 32
       
       def update
         @bot.channels[@out_channel] = (@bot.channels[@in_channels[0]] and @bot.channels[@in_channels[1]])
@@ -62,6 +65,7 @@ module Logicbot
       ID = 3
       PARAMS = 3
       PARAM_FORMAT = [2, 1]
+      COLOUR = 59
 
       def update
         @bot.channels[@out_channel] = (@bot.channels[@in_channels[0]] or @bot.channels[@in_channels[1]])
@@ -73,6 +77,7 @@ module Logicbot
       ID = 4
       PARAMS = 2
       PARAM_FORMAT = [1, 1]
+      COLOUR = 53
       
       def update
         @bot.channels[@out_channel] = !@bot.channels[@in_channels[0]]
@@ -84,6 +89,7 @@ module Logicbot
       ID = 5
       PARAMS = 3
       PARAM_FORMAT = [2, 1]
+      COLOUR = 45      
       
       def update
         @bot.channels[@out_channel] = (@bot.channels[@in_channels[0]] ^ @bot.channels[@in_channels[1]])

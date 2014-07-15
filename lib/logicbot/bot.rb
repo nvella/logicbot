@@ -185,7 +185,8 @@ module Logicbot
                 elsif @objects[pos] != nil then
                   send_chat_message "error: an object already exists at #{pos.join(' ')}."
                 else
-                  block_id = get_block_at *pos
+                  block_id = if Objects::TYPES[sign_data[1]]::COLOUR != nil then Objects::TYPES[sign_data[1]]::COLOUR else get_block_at *pos end
+                  
                   if block_id == nil then
                     send_chat_message "error: internal server error. please try again."
                   else
@@ -207,6 +208,10 @@ module Logicbot
                     
                     @tick_mutex.synchronize do
                       @objects[pos] = Objects::TYPES[sign_data[1]].new self, pos, in_channels, out_channel, true, block_id
+                    end
+                    
+                    if Objects::TYPES[sign_data[1]]::COLOUR != nil then
+                      set_block *pos, Objects::TYPES[sign_data[1]]::COLOUR
                     end
                     
                     6.times {|i| set_sign *pos, i, ''} # Clear all the signs on this block so we can keep update with new changes
