@@ -8,7 +8,7 @@ Basic usage
 
 Logicbot deals with **objects** and **channels**. Objects modify channels based on input from other channels. Currently, there are seven different object types;
 
-  - **toggle** 0 inputs, 1 output (Toggles the state of the output channel)
+  - **toggle** 0 inputs, 1 output (Toggles the state of the output channel when block is broken)
   - **lamp** 1 input, 0 outputs (Sets a high light value if the state of the input channel is true)
   - **and** 2 inputs, 1 output (Sets the state of the output channel to true if the state of both input channels are true)
   - **or** 2 inputs, 1 output (Sets the state of the output channel to true if the state of one or both of the input channels are true)
