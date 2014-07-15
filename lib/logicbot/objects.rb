@@ -17,7 +17,7 @@
 module Logicbot
   module Objects 
     class Base
-      attr_accessor :in_channels, :out_channel, :needs_update, :metadata
+      attr_accessor :in_channels, :out_channel, :needs_update, :metadata, :signs
       def initialize bot, pos, in_channels, out_channel, needs_update = false, metadata = 0
         @bot = bot
         @pos = pos
@@ -25,6 +25,7 @@ module Logicbot
         @out_channel = out_channel
         @needs_update = needs_update
         @metadata = metadata
+        @signs = [''] * 6 # [block_face] = sign_text
       end
       
       def update; end

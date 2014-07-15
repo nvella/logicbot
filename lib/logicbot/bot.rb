@@ -53,6 +53,7 @@ module Logicbot
       json['objects'].each do |pos, data|
         pos = pos.split(',').map {|i| i.to_i}
         @objects[pos] = Objects::TYPES[data['type']].new self, pos, data['in_channels'], data['out_channel'], data['needs_update'], data['metadata']
+        if data['signs'] != nil then @object[pos].signs = data['signs'] end # Provide backwards compat
       end
     end
     
@@ -62,7 +63,8 @@ module Logicbot
       # Save out the objects
       @objects.dup.each do |pos, obj|
         data['objects'][pos.join(',')] =  { 'type' => obj.class.to_s.split(':')[-1].downcase, 'in_channels' => obj.in_channels, 
-                                            'out_channel' => obj.out_channel, 'needs_update' => obj.needs_update, 'metadata' => obj.metadata }
+                                            'out_channel' => obj.out_channel, 'needs_update' => obj.needs_update, 'metadata' => obj.metadata,
+                                            'signs' => obj.signs }
       end
       
       File.open filename, 'w' do |file|
@@ -94,7 +96,7 @@ module Logicbot
       Logicbot.log "#{NAME} version #{VERSION} starting..."
       if File.exists? 'logicbot_state.json' then
         load_from_file 'logicbot_state.json'
-        Logicbot.log "Loaded state."        
+        Logicbot.log 'Loaded state.'
       end
       authenticate
       @tick_thread = Thread.new {tick_thread}
@@ -211,12 +213,17 @@ module Logicbot
                     end
                     send_chat_message "`#{sign_data[1]}' object created at #{pos.join(' ')}."
                   end
+                  6.times {|i| set_sign *pos, i, ''} # Clear all the signs on this block so we can keep update with new changes
                 end
               else
                 send_chat_message "error: logic object type `#{sign_data[1]}' does not exist.\nvalid values are: #{Objects::TYPES.keys.join(' ')}" 
               end
             end
             set_sign *pos, facing, ''
+          else # Placed a sign with text we might not care about
+            if @objects[pos] != nil then # We own a block at this location, update the sign data
+              @objects[pos].signs[facing] = text
+            end
           end
         end  
         flush_buffer                        
