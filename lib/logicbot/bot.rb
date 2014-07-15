@@ -208,7 +208,7 @@ module Logicbot
                       if parameters[param_format[0]] == nil then
                         # Create the block output channel
                         out_channel = pos.join(',')
-                        prepare_channel pos.join(',')
+                        @tick_mutex.synchronize { prepare_channel pos.join(',') }
                       else
                         # Use output channel provided
                         out_channel = parameters[param_format[0]]
