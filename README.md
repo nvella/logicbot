@@ -41,4 +41,8 @@ Logicbot will respond to the following strings when said in chat.
 
   - ``.logicbot debug CHANNEL_NAME`` Returns the state of the channel ``CHANNEL_NAME``.
 
+Todo
+----
 
+ - Clean up code; split protocol code into separate class.
+ - Implement a pass-through object
