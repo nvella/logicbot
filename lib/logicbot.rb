@@ -16,7 +16,7 @@
 
 module Logicbot
   NAME = "Logicbot"
-  VERSION = "0.0.4"
+  VERSION = "0.1.0"
   
   TICK_DELAY = 0.1
   CHUNK_SIZE = 32
