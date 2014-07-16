@@ -353,7 +353,7 @@ module Logicbot
     
     def unresolve_channel pos, channel_name
       if channel_name == nil or channel_name.split(',').length != 3 then return channel_name end
-      other_pos = pos.split(',').map {|i| i.to_i}
+      other_pos = channel_name.split(',').map {|i| i.to_i}
       case [pos[0] - other_pos[0], pos[1]  - other_pos[1], pos[2]  - other_pos[2]]
       when [0, 1, 0]
         return 'u'
