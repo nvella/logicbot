@@ -53,7 +53,7 @@ module Logicbot
       json['objects'].each do |pos, data|
         pos = pos.split(',').map {|i| i.to_i}
         @objects[pos] = Objects::TYPES[data['type']].new self, pos, data['in_channels'], data['out_channel'], data['needs_update'], data['metadata']
-        if data['signs'] != nil then @object[pos].signs = data['signs'] end # Provide backwards compat
+        if data['signs'] != nil then @objects[pos].signs = data['signs'] end # Provide backwards compat
       end
     end
     
