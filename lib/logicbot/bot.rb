@@ -147,6 +147,10 @@ module Logicbot
 
             set_block *pos, @objects[pos].metadata
 
+            if @objects[pos].class == Objects::Lamp then # Restore light value if the object was a lamp
+              @objects[pos].update # Do this by updating the lamp
+            end
+
             @objects[pos].signs.each_with_index do |sign, facing|
               if sign.length > 0 then
                 set_sign *pos, facing, sign
