@@ -220,7 +220,8 @@ module Logicbot
                     end
                     
                     if Objects::TYPES[sign_data[1]]::COLOUR != nil then
-                      set_block *pos, Objects::TYPES[sign_data[1]]::COLOUR
+                      set_block *pos, 0 # Break the block
+                      set_block *pos, Objects::TYPES[sign_data[1]]::COLOUR # Then set it
                     end
                     
                     6.times {|i| set_sign *pos, i, ''} # Clear all the signs on this block so we can keep update with new changes
