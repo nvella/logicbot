@@ -171,7 +171,7 @@ module Logicbot
               end
             when 'info' # Player wants info on object
               if @objects[pos] != nil then
-                send_chat_message "info for object at #{pos.join(' ')}.\nTYPE(#{@objects[pos].class.to_s.split(':')[-1].downcase}) IN(#{@objects[pos].in_channels.join(' ').rstrip}) OUT(#{@objects[pos].out_channel})"
+                send_chat_message "info for object at #{pos.join(' ')}.\nTYPE(#{@objects[pos].class.to_s.split(':')[-1].downcase}) IN(#{@objects[pos].in_channels.map {|c| unresolve_channel pos, c}.join(' ').rstrip}) OUT(#{unresolve_channel pos, @objects[pos].out_channel})"
               else
                 send_chat_message "error: no object exists at #{pos.join(' ')}."
               end
@@ -351,6 +351,26 @@ module Logicbot
       @channels[channel] = !@channels[channel]
     end
     
+    def unresolve_channel pos, channel_name
+      if channel_name == nil or channel_name.split(',').length != 3 then return channel_name end
+      other_pos = pos.split(',').map {|i| i.to_i}
+      case [pos[0] - other_pos[0], pos[1]  - other_pos[1], pos[2]  - other_pos[2]]
+      when [0, 1, 0]
+        return 'u'
+      when [0, -1, 0]
+        return 'd'
+      when [1, 0, 0]
+        return 'n'
+      when [-1, 0, 0]
+        return 's'
+      when [0, 0, 1]
+        return 'e'
+      when [0, 0, -1]
+        return 'w'                        
+      else
+        return channel_name
+      end
+    end
       
     def resolve_channel pos, channel_name
       case channel_name.downcase
