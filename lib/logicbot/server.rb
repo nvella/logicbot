@@ -25,5 +25,20 @@ module Logicbot
       
       @tcp = nil
     end
+    
+    def connect
+      # Authenticate with craft.michaelfogleman.com
+      uri = URI.parse 'https://craft.michaelfogleman.com/api/1/identity'
+      http = Net::HTTP.new uri.host, uri.port
+      http.use_ssl = true
+
+      response = http.post uri.request_uri, "username=#{@username}&identity_token=#{@identity_token}"
+      server_token = response.body.chomp
+      if server_token.length != 32 then raise "Could not authenticate!" end
+      
+      # Connect and authenticate with the server
+      @tcp = TCPSocket.new @server_name, @server_port
+      @tcp.puts "A,#{@username},#{server_token}"
+    end
   end
 end
