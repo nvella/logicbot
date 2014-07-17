@@ -40,5 +40,28 @@ module Logicbot
       @tcp = TCPSocket.new @server_name, @server_port
       @tcp.puts "A,#{@username},#{server_token}"
     end
+    
+    def get_event
+      # Blocks and returns an event hash
+      data = @tcp.gets.chomp.split(',')
+      
+      case data[0]
+      when 'T'            # Chat message
+        message_contents = data[1 .. -1].join(',')
+        if message_contents.split('>')[1] != nil then # If message was said by player
+          return {:type => :chat_message, :sender => message_contents.split('>')[0], :message => message_contents.split('>')[1].lstrip}
+        else
+          return {:type => :server_broadcast, :message => message_contents}
+        end
+      when 'B'            # Block change
+        pos = [data[3].to_i, data[4].to_i, data[5].to_i] # Create the position data
+        if data[1].to_i != pos[0] / CHUNK_SIZE or data[2].to_i != pos[2] / CHUNK_SIZE then return nil end
+        return {:type => :block_change, :pos => pos, :id => data[6].to_i}
+      when 'S'            # Sign change
+        return {:type => :sign_update, :pos => [data[3].to_i, data[4].to_i, data[5].to_i], :facing => data[6].to_i, :text => data[7 .. -1].join(',')}
+      else
+        return nil
+      end
+    end
   end
 end
