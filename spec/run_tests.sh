@@ -14,4 +14,4 @@
 #    along with Logicbot.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-for file in spec/*_spec.rb; do ruby $file; done 
+for file in *_spec.rb; do ruby $file; done 
