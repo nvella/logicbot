@@ -16,12 +16,20 @@
 
 module Logicbot
   class Server
+    attr_accessor :block_cache
+    attr_reader :username
+  
     def initialize username, identity_token, server_name, server_port
       @username = username
       @identity_token = identity_token
       
       @server_name = server_name
       @server_port = server_port
+      @block_cache = {}
+      
+      @write_mutex = Mutex.new
+      
+      @buffer = ''
       
       @tcp = nil
     end
@@ -51,7 +59,7 @@ module Logicbot
         if message_contents.split('>')[1] != nil then # If message was said by player
           return {:type => :chat_message, :sender => message_contents.split('>')[0], :message => message_contents.split('>')[1].lstrip}
         else
-          return {:type => :server_broadcast, :message => message_contents}
+          return {:type => :chat_broadcast, :message => message_contents}
         end
       when 'B'            # Block change
         pos = [data[3].to_i, data[4].to_i, data[5].to_i] # Create the position data
@@ -61,6 +69,37 @@ module Logicbot
         return {:type => :sign_update, :pos => [data[3].to_i, data[4].to_i, data[5].to_i], :facing => data[6].to_i, :text => data[7 .. -1].join(',')}
       else
         return nil
+      end
+    end
+    
+    def blocks[x, y, z]     # get_block_at
+      # Return block if it exists in cache
+      if @block_cache[[x, y, z]] != nil then return @block_cache[[x, y, z]] end
+
+      # Otherwise, request the chunk the block is in.
+      @write_mutex.synchronize do
+        chunk_x = (x / CHUNK_SIZE).floor
+        chunk_z = (z / CHUNK_SIZE).floor        
+        @tcp.puts "C,#{chunk_x},#{chunk_z}"
+        @tcp.flush
+        
+        # Keep mutex locked to stop other threads requesting from server
+        while true do
+          data = @tcp.gets.chomp.split(',')
+          if data[0] == 'B' then
+            @block_cache[[data[3].to_i, data[4].to_i, data[5].to_i]] = data[6].to_i
+          elsif data[0] == 'C' then
+            break
+          end
+        end
+      end
+      
+      return @block_cache[[x, y, z]]
+    end
+    
+    def blocks[x, y, z]= id # set_block
+      @write_mutex.synchronize do
+        @buffer += "B,#{x},#{y},#{z},#{id}\n"
       end
     end
   end
