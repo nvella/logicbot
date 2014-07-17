@@ -102,5 +102,13 @@ module Logicbot
         @buffer += "B,#{x},#{y},#{z},#{id}\n"
       end
     end
+        
+    def flush_buffer
+      @write_mutex.synchronize do
+        @tcp.write @buffer
+        @tcp.flush
+        @buffer = ''
+      end
+    end
   end
 end
