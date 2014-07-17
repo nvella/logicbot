@@ -35,3 +35,4 @@ require 'json'
 
 require 'logicbot/bot'
 require 'logicbot/objects'
+require 'logicbot/server'
