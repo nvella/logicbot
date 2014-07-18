@@ -127,6 +127,12 @@ module Logicbot
       end
     end
     
+    def set_position x, y, z, rotate_x, rotate_y
+      @write_mutex.synchronize do
+        @buffer += "P,#{x.to_f},#{y.to_f},#{z.to_f},#{rotate_x.to_f},#{roate_y.to_f}\n"
+      end
+    end
+    
     def disconnect
       if @tcp != nil then
         @tcp.close
