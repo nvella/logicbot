@@ -118,5 +118,11 @@ module Logicbot
         end
       end
     end
+    
+    def set_sign x, y, z, facing, text
+      @write_mutex.synchronize do
+        @buffer += "S,#{x},#{y},#{z},#{facing},#{text}\n"
+      end
+    end
   end
 end
