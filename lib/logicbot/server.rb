@@ -133,6 +133,12 @@ module Logicbot
       end
     end
     
+    def set_light x, y, z, light
+      @write_mutex.synchronize do
+        @buffer += "L,#{x},#{y},#{z},#{light}\n"
+      end      
+    end
+    
     def disconnect
       if @tcp != nil then
         @tcp.close
