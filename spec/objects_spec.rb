@@ -19,6 +19,25 @@ require 'minitest/autorun'
 
 require_relative '../lib/logicbot'
 
+describe Logicbot::Objects::Lamp do
+  it 'can correctly change light value to 15' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => true}
+    Logicbot::Objects::Lamp.new(bot, [0, 0, 0], ['a'], nil).update
+    bot.server.instance_variable_get(:@buffer).must_equal "L,0,0,0,15\n"
+  end
+  
+  it 'can correctly change light value to 0 after being 15' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    lamp = Logicbot::Objects::Lamp.new(bot, [0, 0, 0], ['a'], nil)
+    bot.channels = {'a' => true}
+    lamp.update
+    bot.channels['a'] = false
+    lamp.update
+    bot.server.instance_variable_get(:@buffer).must_equal "L,0,0,0,15\nL,0,0,0,0\n"
+  end
+end
+
 describe Logicbot::Objects::AND do
   it 'can correctly return true' do
     bot = Logicbot::Bot.new '', '', '', 0
@@ -114,4 +133,23 @@ describe Logicbot::Objects::XOR do
     Logicbot::Objects::XOR.new(bot, [0, 0, 0], ['a', 'b'], 'out').update
     bot.channels['out'].must_equal false
   end  
+end
+
+describe Logicbot::Objects::Indicator do
+  it 'can correctly change to true' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => true}
+    Logicbot::Objects::Indicator.new(bot, [0, 0, 0], ['a'], nil).update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,34\n"
+  end
+  
+  it 'can correctly change to false after being true' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    indicator = Logicbot::Objects::Indicator.new(bot, [0, 0, 0], ['a'], nil)
+    bot.channels = {'a' => true}
+    indicator.update
+    bot.channels['a'] = false
+    indicator.update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,34\nB,0,0,0,0\nB,0,0,0,43\n"
+  end
 end
