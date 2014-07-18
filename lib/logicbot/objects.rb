@@ -45,7 +45,7 @@ module Logicbot
       PARAM_FORMAT = [1, 0]
       
       def update
-        @bot.buffer += "L,#{@pos.join(',')},#{if @bot.channels[@in_channels[0]] then 15 else 0 end}\n"
+        @bot.server.set_light *@pos, if @bot.channels[@in_channels[0]] then 15 else 0 end
       end
     end
     
@@ -103,8 +103,9 @@ module Logicbot
       PARAM_FORMAT = [1, 0]
       
       def update
-        @bot.buffer += "B,#{@pos.join(',')},0\nB,#{@pos.join(',')},#{if @bot.channels[@in_channels[0]] then 34 else 43 end}\n"
-      end      
+        @bot.server.set_block *@pos, 0
+        @bot.server.set_block *@pos, if @bot.channels[@in_channels[0]] then 34 else 43 end
+      end
     end
     
     TYPES = {
