@@ -16,7 +16,7 @@
 
 module Logicbot
   class Bot
-    attr_accessor :tcp, :buffer, :channels, :objects, :ticks
+    attr_accessor :tcp, :buffer, :channels, :objects, :ticks, :server
   
     def initialize username, identity_token, server_name, server_port
       @username = username
