@@ -108,4 +108,13 @@ describe Logicbot::Server do
     server.set_block 5, 5, 5, 10
     server.instance_variable_get(:@buffer).must_equal "B,5,5,5,10\n"
   end
+  
+  it 'can flush the buffer correctly' do
+    server = Logicbot::Server.new '', '', '', 0
+    bidir_io = BidirectionalStringIO.new    
+    server.instance_variable_set :@tcp, bidir_io    
+    server.set_block 5, 5, 5, 10
+    server.flush_buffer
+    bidir_io.out_io.string.must_equal "B,5,5,5,10\n"
+  end
 end
