@@ -21,6 +21,37 @@ require 'stringio'
 
 require_relative '../lib/logicbot'
 
+class BidirectionalStringIO
+  attr_accessor :in_io, :out_io
+
+  def initialize
+    @in_io = StringIO.new
+    @out_io = StringIO.new
+  end
+  
+  def write str
+    @out_io.write str
+  end
+  
+  def print str
+    write str
+  end
+  
+  def puts str
+    print "#{str}\n"
+  end
+  
+  def read bytes
+    @in_io.read bytes
+  end
+  
+  def gets
+    @in_io.gets
+  end
+  
+  def flush; end
+end
+
 describe Logicbot::Server do
   it 'can correctly handle a server chat message broadcast' do
     server = Logicbot::Server.new '', '', '', 0
@@ -55,5 +86,20 @@ describe Logicbot::Server do
     io = StringIO.new "S,0,0,1,1,1,4,test,test\n"
     server.instance_variable_set :@tcp, io
     server.get_event.must_equal({:type => :sign_update, :pos => [1, 1, 1], :facing => 4, :text => 'test,test'})
+  end
+  
+  it 'can retrieve a block from the server when not in cache' do
+    server = Logicbot::Server.new '', '', '', 0
+    bidir_io = BidirectionalStringIO.new
+    bidir_io.in_io = StringIO.new "B,0,0,5,5,5,10\nC,0,0\n"
+    server.instance_variable_set :@tcp, bidir_io
+    server.get_block(5, 5, 5).must_equal 10
+    bidir_io.out_io.string.must_equal "C,0,0\n"
+  end
+  
+  it 'can retrieve a block from the server when in cache' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.instance_variable_set :@block_cache, {[5, 5, 5] => 10}
+    server.get_block(5, 5, 5).must_equal 10
   end
 end
