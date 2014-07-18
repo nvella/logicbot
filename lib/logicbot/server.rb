@@ -110,5 +110,13 @@ module Logicbot
         @buffer = ''
       end
     end
+    
+    def send_chat_message message
+      @write_mutex.synchronize do
+        message.lines.each do |line|
+          @buffer += "T,#{line.chomp}\n"
+        end
+      end
+    end
   end
 end
