@@ -124,5 +124,11 @@ module Logicbot
         @buffer += "S,#{x},#{y},#{z},#{facing},#{text}\n"
       end
     end
+    
+    def disconnect
+      if @tcp != nil then
+        @tcp.close
+      end
+    end
   end
 end
