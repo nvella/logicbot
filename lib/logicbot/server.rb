@@ -64,6 +64,7 @@ module Logicbot
       when 'B'            # Block change
         pos = [data[3].to_i, data[4].to_i, data[5].to_i] # Create the position data
         if data[1].to_i != pos[0] / CHUNK_SIZE or data[2].to_i != pos[2] / CHUNK_SIZE then return nil end
+        @block_cache[pos] = data[6].to_i
         return {:type => :block_change, :pos => pos, :id => data[6].to_i}
       when 'S'            # Sign change
         return {:type => :sign_update, :pos => [data[3].to_i, data[4].to_i, data[5].to_i], :facing => data[6].to_i, :text => data[7 .. -1].join(',')}
