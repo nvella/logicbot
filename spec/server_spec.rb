@@ -135,4 +135,10 @@ describe Logicbot::Server do
     server.set_sign 5, 5, 5, 6, 'test'
     server.instance_variable_get(:@buffer).must_equal "S,5,5,5,6,test\n"
   end
+  
+  it 'can set position' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.set_position 1.2, 2.3, 3.4, 4.5, 5.6
+    server.instance_variable_get(:@buffer).must_equal "P,1.2,2.3,3.4,4.5,5.6\n"
+  end
 end
