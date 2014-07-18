@@ -141,4 +141,10 @@ describe Logicbot::Server do
     server.set_position 1.2, 2.3, 3.4, 4.5, 5.6
     server.instance_variable_get(:@buffer).must_equal "P,1.2,2.3,3.4,4.5,5.6\n"
   end
+  
+  it 'can set light values' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.set_light 5, 4, 3, 15
+    server.instance_variable_get(:@buffer).must_equal "L,5,4,3,15\n"
+  end  
 end
