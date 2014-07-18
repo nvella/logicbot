@@ -128,5 +128,11 @@ describe Logicbot::Server do
     server = Logicbot::Server.new '', '', '', 0
     server.send_chat_message "test\ntest\n"
     server.instance_variable_get(:@buffer).must_equal "T,test\nT,test\n"
-  end  
+  end
+  
+  it 'can set a sign' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.set_sign 5, 5, 5, 6, 'test'
+    server.instance_variable_get(:@buffer).must_equal "S,5,5,5,6,test\n"
+  end
 end
