@@ -117,4 +117,16 @@ describe Logicbot::Server do
     server.flush_buffer
     bidir_io.out_io.string.must_equal "B,5,5,5,10\n"
   end
+  
+  it 'can send a chat message' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.send_chat_message "test"
+    server.instance_variable_get(:@buffer).must_equal "T,test\n"
+  end
+  
+  it 'can send a multiline chat message' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.send_chat_message "test\ntest\n"
+    server.instance_variable_get(:@buffer).must_equal "T,test\nT,test\n"
+  end  
 end
