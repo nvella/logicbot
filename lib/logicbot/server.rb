@@ -72,7 +72,7 @@ module Logicbot
       end
     end
     
-    def blocks[x, y, z]     # get_block_at
+    def get_block x, y, z     # get_block_at
       # Return block if it exists in cache
       if @block_cache[[x, y, z]] != nil then return @block_cache[[x, y, z]] end
 
@@ -97,7 +97,7 @@ module Logicbot
       return @block_cache[[x, y, z]]
     end
     
-    def blocks[x, y, z]= id # set_block
+    def set_block x, y, z, id # set_block
       @write_mutex.synchronize do
         @buffer += "B,#{x},#{y},#{z},#{id}\n"
       end
