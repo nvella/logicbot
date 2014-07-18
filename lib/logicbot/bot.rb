@@ -25,7 +25,6 @@ module Logicbot
       @tcp = nil
       
       @tick_mutex = Mutex.new
-      @write_mutex = Mutex.new
       
       @block_cache = {} # Kept upto date with the block types in the world
       @buffer = ''
@@ -82,9 +81,7 @@ module Logicbot
       Signal.trap('SIGINT') {Logicbot.log 'Quitting...'; @server.disconnect; save_to_file 'logicbot_state.json'; exit}
       # Go home
       if @home != nil then
-        @write_mutex.synchronize do
-          @tcp.puts "P,#{@home.join(',')}"
-        end
+        @server.set_position *@home
       end
       @server.send_chat_message "#{NAME} version #{VERSION}"
       @server.flush_buffer
