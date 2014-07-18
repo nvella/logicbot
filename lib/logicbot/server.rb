@@ -99,6 +99,7 @@ module Logicbot
     end
     
     def set_block x, y, z, id # set_block
+      @block_cache[[x, y, z]] = id    
       @write_mutex.synchronize do
         @buffer += "B,#{x},#{y},#{z},#{id}\n"
       end
