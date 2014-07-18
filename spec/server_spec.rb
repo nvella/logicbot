@@ -102,4 +102,10 @@ describe Logicbot::Server do
     server.instance_variable_set :@block_cache, {[5, 5, 5] => 10}
     server.get_block(5, 5, 5).must_equal 10
   end
+  
+  it 'can set a block on the server' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.set_block 5, 5, 5, 10
+    server.instance_variable_get(:@buffer).must_equal "B,5,5,5,10\n"
+  end
 end
