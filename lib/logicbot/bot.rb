@@ -95,7 +95,7 @@ module Logicbot
         when :chat_message # Chat message
           Logicbot.log "Chat: #{event[:message]}"
           command = event[:message].split(' ') # Split message into params
-          if command[0] == '.logicbot' or command[0] == "@#{@username}" then # If the message is directed at us
+          if command[0] == ".#{@username.downcase}" or command[0] == "@#{@username}" then # If the message is directed at us
             case command[1]
             when 'debug'
               if command[2] == nil then
@@ -120,8 +120,8 @@ module Logicbot
 
             @server.set_block *event[:pos], @objects[event[:pos]].metadata
 
-            if @objects[event[:pos]].class == Objects::Lamp then # Restore light value if the object was a lamp
-              @objects[event[:pos]].update # Do this by updating the lamp
+            if @objects[event[:pos]].class::NEEDS_UPDATE_AFTER_BREAK then # Update the object if it needs it
+              @objects[event[:pos]].update
             end
 
             @objects[event[:pos]].signs.each_with_index do |sign, facing|
