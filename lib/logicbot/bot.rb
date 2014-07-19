@@ -208,7 +208,7 @@ module Logicbot
             @server.set_sign *event[:pos], event[:facing], ''
           else # Placed a sign with text we might not care about
             if @objects[event[:pos]] != nil then # We own a block at this location, update the sign data
-              @objects[event[:pos]].signs[event[:facing]] = text
+              @objects[event[:pos]].signs[event[:facing]] = event[:text]
             end
           end
         end  
