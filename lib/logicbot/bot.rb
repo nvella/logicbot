@@ -154,7 +154,7 @@ module Logicbot
                 parameters = sign_data[2 .. 4]
                 if !(parameters.length >= Objects::TYPES[sign_data[1]]::PARAMS or (parameters.length >= (Objects::TYPES[sign_data[1]]::PARAMS - 1) and Objects::TYPES[sign_data[1]]::PARAM_FORMAT[1] > 0)) then
                   param_format = Objects::TYPES[sign_data[1]]::PARAM_FORMAT
-                  @server.send_chat_message "error: object type `#{sign_data[1]}' expects parameters in format #{'input ' * param_format[0]}[#{'output' * param_format[1]}]"
+                  @server.send_chat_message "error: object type `#{sign_data[1]}' expects parameters in format #{(('input ' * param_format[0]) + if param_format[1] > 0 then '[output]' else '' end).rstrip}"
                 elsif @objects[event[:pos]] != nil then
                   @server.send_chat_message "error: an object already exists at #{event[:pos].join(' ')}."
                 else
@@ -202,7 +202,7 @@ module Logicbot
                   end
                 end
               else
-                @server.send_chat_message "error: logic object type `#{sign_data[1]}' does not exist.\nvalid values are: #{Objects::TYPES.keys.join(' ')}" 
+                @server.send_chat_message "error: logic object type `#{sign_data[1]}' does not exist.\nvalid values are `#{Objects::TYPES.keys.join('\' `')}'"
               end
             end
             @server.set_sign *event[:pos], event[:facing], ''
