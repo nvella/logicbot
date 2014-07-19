@@ -130,6 +130,18 @@ describe Logicbot::Server do
     server.instance_variable_get(:@buffer).must_equal "T,test\nT,test\n"
   end
   
+  it 'can send a private message' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.send_private_message "test_player", "test"
+    server.instance_variable_get(:@buffer).must_equal "T,@test_player test\n"
+  end
+  
+  it 'can send a multiline private message' do
+    server = Logicbot::Server.new '', '', '', 0
+    server.send_private_message "test_player", "test\ntest\n"
+    server.instance_variable_get(:@buffer).must_equal "T,@test_player test\nT,@test_player test\n"
+  end
+  
   it 'can set a sign' do
     server = Logicbot::Server.new '', '', '', 0
     server.set_sign 5, 5, 5, 6, 'test'
