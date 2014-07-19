@@ -95,15 +95,15 @@ module Logicbot
         when :chat_message # Chat message
           Logicbot.log "Chat: #{event[:message]}"
           command = event[:message].split(' ') # Split message into params
-          if command[0] == '.logicbot' then # If the message is directed at us
+          if command[0] == '.logicbot' or command[0] == '@logicbot' then # If the message is directed at us
             case command[1]
             when 'debug'
               if command[2] == nil then
-                @server.send_chat_message 'usage: .logicbot debug CHANNEL_NAME'
+                @server.send_private_message event[:sender], 'usage: @logicbot debug CHANNEL_NAME'
               elsif @channels[command[2]] == nil then
-                @server.send_chat_message 'error: no such channel.'
+                @server.send_private_message event[:sender], 'error: no such channel.'
               else
-                @server.send_chat_message "#{command[2]} => #{@channels[command[2]]}"
+                @server.send_private_message event[:sender], "#{command[2]} => #{@channels[command[2]]}"
               end
             end
           end
