@@ -152,6 +152,13 @@ module Logicbot
       def force_update
         @bot.server.set_block *@pos, 0
         @bot.server.set_block *@pos, if @bot.channels[@in_channels[0]] then 34 else 43 end
+
+        @signs.each_with_index do |sign, facing|
+          if sign.length > 0 then
+            @bot.server.set_sign *@pos, facing, sign
+          end
+        end
+
         @last_state = @bot.channels[@in_channels[0]]
       end
     end

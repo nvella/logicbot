@@ -234,4 +234,13 @@ describe Logicbot::Objects::Indicator do
     lamp.update
     bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,34\n"
   end
+  
+  it 'restores signs on update' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => true}
+    obj = Logicbot::Objects::Indicator.new(bot, [0, 0, 0], ['a'], nil)
+    obj.signs[0] = 'test'
+    obj.update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,34\nS,0,0,0,0,test\n"
+  end
 end
