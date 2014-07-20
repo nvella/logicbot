@@ -225,7 +225,8 @@ module Logicbot
     def tick_thread
       while true do
         start_time = Time.now
-        players_on = @server.players.length > 1
+        players_on = false
+        @server.players.each {|id, name| if not name.downcase.include? 'bot' then players_on = true; break end}
         
         @tick_mutex.synchronize do
           buffer = ''
