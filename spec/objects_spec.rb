@@ -226,7 +226,7 @@ describe Logicbot::Objects::Indicator do
     bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,43\n"
   end
   
-  it 'does nothing if changing to 15 after 15' do
+  it 'does nothing if changing to true after true' do
     bot = Logicbot::Bot.new '', '', '', 0
     lamp = Logicbot::Objects::Indicator.new(bot, [0, 0, 0], ['a'], nil)
     bot.channels = {'a' => true}
