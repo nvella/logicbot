@@ -15,6 +15,7 @@ Logicbot deals with **objects** and **channels**. Objects modify channels based 
   - **not** 1 input, 1 output (Sets the state of the output channel to the inverse state of the input channel)
   - **xor** 2 inputs, 1 output (Sets the state of the output channel to true *only if the state of one* input channel is true)
   - **indicator** 1 input, 0 outputs (Sets the block the object is placed on to either a green block or a red block depending on the state of the input channel)
+  - **door** 1 input, 0 outputs (Removes the block the object is placed on if the state of the input channel is true and restores it if the state of the input channel is false)
 
 To use these objects, place a sign on the block you want to add a logic object to with the contents
 
@@ -29,20 +30,39 @@ An example for an AND object that changes the state of myOutput if myInput1 and 
 To delete an object, simply place a sign on it with the contents;
 
   `` `logic delete ``
+  
+and to delete both the object and the block the object was added to;
+  
+  `` `logic delete block``
 
-And to retrieve information about an object, place a sign on it with the contents;
+To retrieve information about an object, place a sign on it with the contents;
 
   `` `logic info ``
+
+Special, relative channels
+--------------------------
+
+The following channels are 'special' channels. They behave differently from user-created channels.
+
+  - **n** (Relative channel - Always points to the object NORTH of the object being created - x+1)
+  - **s** (Relative channel - Always points to the object SOUTH of the object being created - x-1)
+  - **e** (Relative channel - Always points to the object EAST of the object being created - z+1)
+  - **w** (Relative channel - Always points to the object WEST of the object being created - z-1)
+  - **u** (Relative channel - Always points to the object ABOVE the object being created - y+1)
+  - **d** (Relative channel - Always points to the object BELOW the object being created - y-1)
+  - **t** (Always true/on)
+  - **f** (Always false/off)
+  
+Along with these special channels, you may omit the output parameter when creating an object to automatically name the output channel of the object based on the object's co-ordinates. This makes it easy to quickly create relative systems.
 
 Chat commands
 -------------
 
 Logicbot will respond to the following strings when said in chat.
 
-  - ``.logicbot debug CHANNEL_NAME`` Returns the state of the channel ``CHANNEL_NAME``.
+  - ``.logicbot debug CHANNEL_NAME`` or ``@Logicbot debug CHANNEL_NAME`` - Returns the state of the channel ``CHANNEL_NAME``.
 
 Todo
 ----
 
- - Clean up code; split protocol code into separate class.
- - Implement a pass-through object
+ *Please see the Github issues page for the todo list.*
