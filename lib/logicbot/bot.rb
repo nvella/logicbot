@@ -200,6 +200,11 @@ module Logicbot
                     end
                     
                     6.times {|i| @server.set_sign *event[:pos], i, ''} # Clear all the signs on this block so we can keep update with new changes
+
+                    # Add description sign
+                    @objects[event[:pos]].signs[event[:facing]] = "#{@objects[event[:pos]].class.to_s.split(':')[-1].downcase} #{@objects[event[:pos]].in_channels.map {|c| unresolve_channel event[:pos], c}.join(' ').rstrip} #{unresolve_channel event[:pos], @objects[event[:pos]].out_channel}"
+                    @server.set_sign *event[:pos], event[:facing], @objects[event[:pos]].signs[event[:facing]]
+
                     @server.send_chat_message "`#{sign_data[1]}' object created at #{event[:pos].join(' ')}."
                   end
                 end
