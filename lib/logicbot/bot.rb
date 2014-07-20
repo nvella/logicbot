@@ -93,7 +93,7 @@ module Logicbot
         
         case event[:type]
         when :chat_message # Chat message
-          Logicbot.log "Chat: #{event[:message]}"
+          Logicbot.log "Chat: #{event[:sender]}> #{event[:message]}"
           command = event[:message].split(' ') # Split message into params
           if command[0] == ".#{@username.downcase}" or command[0] == "@#{@username}" then # If the message is directed at us
             case command[1]
