@@ -137,7 +137,8 @@ module Logicbot
             when 'delete', 'remove' # Player wants to delete object
               if @objects[event[:pos]] != nil then
                 @tick_mutex.synchronize { @objects.delete event[:pos] }
-                @server.send_chat_message "deleted object at #{event[:pos].join(' ')}."
+                if sign_data[2] == 'block' then @server.set_block *event[:pos], 0 end
+                @server.send_chat_message "deleted object #{if sign_data[2] == 'block' then 'and block ' end}at #{event[:pos].join(' ')}."
               else
                 @server.send_chat_message "error: no object exists at #{event[:pos].join(' ')}."
               end
