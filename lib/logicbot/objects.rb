@@ -163,6 +163,39 @@ module Logicbot
       end
     end
     
+    class Door < Base
+      ID = 7
+      PARAMS = 1
+      PARAM_FORMAT = [1, 0]
+      NEEDS_UPDATE_AFTER_BREAK = true
+      
+      def update
+        if @last_state != @bot.channels[@in_channels[0]] then
+          force_update
+        end
+      end
+      
+      def force_update
+        if @bot.channels[@in_channels[0]] then
+          @bot.server.set_block *@pos, 0
+        else
+          if @bot.server.block_cache[@pos] != 0 then
+            # Clear the doorway if something is occupying it
+            @bot.server.set_block *@pos, 0
+          end
+          
+          @bot.server.set_block *@pos, @metadata
+          @signs.each_with_index do |sign, facing|
+            if sign.length > 0 then
+              @bot.server.set_sign *@pos, facing, sign
+            end
+          end
+        end
+
+        @last_state = @bot.channels[@in_channels[0]]
+      end
+    end
+    
     TYPES = {
       'toggle' => Toggle,
       'lamp'   => Lamp,
@@ -170,7 +203,8 @@ module Logicbot
       'or'     => OR,
       'not'    => NOT,
       'xor'    => XOR,
-      'indicator' => Indicator
+      'indicator' => Indicator,
+      'door'   => Door
     }    
   end
 end  

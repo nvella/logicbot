@@ -244,3 +244,41 @@ describe Logicbot::Objects::Indicator do
     bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,34\nS,0,0,0,0,test\n"
   end
 end
+
+describe Logicbot::Objects::Door do
+  it 'can close' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => false}
+    Logicbot::Objects::Door.new(bot, [0, 0, 0], ['a'], nil, false, 15).update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,15\n"
+  end
+  
+  it 'can open after being closed' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => false}
+    obj = Logicbot::Objects::Door.new(bot, [0, 0, 0], ['a'], nil, false, 15)
+    obj.update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,15\n"
+    bot.channels = {'a' => true}
+    obj.update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,15\nB,0,0,0,0\n"
+  end
+  
+  it 'does nothing if changing to false after false' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => false}
+    obj = Logicbot::Objects::Door.new(bot, [0, 0, 0], ['a'], nil, false, 15)
+    obj.update
+    obj.update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,15\n"
+  end
+  
+  it 'does nothing if changing to true after true' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => true}
+    obj = Logicbot::Objects::Door.new(bot, [0, 0, 0], ['a'], nil, false, 15)
+    obj.update
+    obj.update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\n"
+  end
+end
