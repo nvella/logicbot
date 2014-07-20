@@ -132,6 +132,7 @@ module Logicbot
           end
         when :sign_update # Sign
           if event[:text][0 .. 6] == '[logic]' or event[:text][0 .. 5] == '`logic' then # TODO Add config option for these keywords
+            @server.set_sign *event[:pos], event[:facing], ''
             sign_data = event[:text].split(' ')
             case sign_data[1]
             when 'delete', 'remove' # Player wants to delete object
@@ -206,7 +207,6 @@ module Logicbot
                 @server.send_chat_message "error: logic object type `#{sign_data[1]}' does not exist.\nvalid values are `#{Objects::TYPES.keys.join('\' `')}'"
               end
             end
-            @server.set_sign *event[:pos], event[:facing], ''
           else # Placed a sign with text we might not care about
             if @objects[event[:pos]] != nil then # We own a block at this location, update the sign data
               @objects[event[:pos]].signs[event[:facing]] = event[:text]
