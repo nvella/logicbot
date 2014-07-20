@@ -29,9 +29,12 @@ module Logicbot
         @needs_update = needs_update
         @metadata = metadata
         @signs = [''] * 6 # [block_face] = sign_text
+        @last_state = nil
       end
       
-      def update; end
+      def update; force_update; end
+      
+      def force_update; end
     end
     
     class Toggle < Base
@@ -47,7 +50,14 @@ module Logicbot
       NEEDS_UPDATE_AFTER_BREAK = true
       
       def update
+        if @last_state != @bot.channels[@in_channels[0]] then
+          force_update
+        end
+      end
+      
+      def force_update
         @bot.server.set_light *@pos, if @bot.channels[@in_channels[0]] then 15 else 0 end
+        @last_state = @bot.channels[@in_channels[0]]
       end
     end
     
@@ -58,8 +68,15 @@ module Logicbot
       COLOUR = 32
       
       def update
+        if @last_state != (@bot.channels[@in_channels[0]] and @bot.channels[@in_channels[1]]) then
+          force_update
+        end
+      end
+      
+      def force_update
         @bot.channels[@out_channel] = (@bot.channels[@in_channels[0]] and @bot.channels[@in_channels[1]])
         @bot.mark_channel_for_update @out_channel
+        @last_state = @bot.channels[@out_channel]
       end
     end
     
@@ -70,9 +87,16 @@ module Logicbot
       COLOUR = 59
 
       def update
+        if @last_state != (@bot.channels[@in_channels[0]] or @bot.channels[@in_channels[1]]) then
+          force_update
+        end
+      end
+      
+      def force_update
         @bot.channels[@out_channel] = (@bot.channels[@in_channels[0]] or @bot.channels[@in_channels[1]])
         @bot.mark_channel_for_update @out_channel
-      end      
+        @last_state = @bot.channels[@out_channel]
+      end
     end
     
     class NOT < Base
@@ -82,9 +106,16 @@ module Logicbot
       COLOUR = 53
       
       def update
+        if @last_state != !@bot.channels[@in_channels[0]] then
+          force_update
+        end
+      end
+      
+      def force_update
         @bot.channels[@out_channel] = !@bot.channels[@in_channels[0]]
         @bot.mark_channel_for_update @out_channel
-      end      
+        @last_state = @bot.channels[@out_channel]
+      end
     end
     
     class XOR < Base
@@ -94,8 +125,15 @@ module Logicbot
       COLOUR = 45      
       
       def update
+        if @last_state != (@bot.channels[@in_channels[0]] ^ @bot.channels[@in_channels[1]]) then
+          force_update
+        end
+      end
+      
+      def force_update
         @bot.channels[@out_channel] = (@bot.channels[@in_channels[0]] ^ @bot.channels[@in_channels[1]])
         @bot.mark_channel_for_update @out_channel
+        @last_state = @bot.channels[@out_channel]
       end
     end
     
@@ -106,8 +144,15 @@ module Logicbot
       NEEDS_UPDATE_AFTER_BREAK = true
       
       def update
+        if @last_state != @bot.channels[@in_channels[0]] then
+          force_update
+        end
+      end
+      
+      def force_update
         @bot.server.set_block *@pos, 0
         @bot.server.set_block *@pos, if @bot.channels[@in_channels[0]] then 34 else 43 end
+        @last_state = @bot.channels[@in_channels[0]]
       end
     end
     

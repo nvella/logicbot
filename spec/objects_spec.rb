@@ -36,6 +36,24 @@ describe Logicbot::Objects::Lamp do
     lamp.update
     bot.server.instance_variable_get(:@buffer).must_equal "L,0,0,0,15\nL,0,0,0,0\n"
   end
+  
+  it 'does nothing if changing to 0 after 0' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    lamp = Logicbot::Objects::Lamp.new(bot, [0, 0, 0], ['a'], nil)
+    bot.channels = {'a' => false}
+    lamp.update
+    lamp.update
+    bot.server.instance_variable_get(:@buffer).must_equal "L,0,0,0,0\n"
+  end
+  
+  it 'does nothing if changing to 15 after 15' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    lamp = Logicbot::Objects::Lamp.new(bot, [0, 0, 0], ['a'], nil)
+    bot.channels = {'a' => true}
+    lamp.update
+    lamp.update
+    bot.server.instance_variable_get(:@buffer).must_equal "L,0,0,0,15\n"
+  end
 end
 
 describe Logicbot::Objects::AND do
@@ -62,7 +80,18 @@ describe Logicbot::Objects::AND do
     bot.channels = {'a' => false, 'b' => false, 'out' => false}
     Logicbot::Objects::AND.new(bot, [0, 0, 0], ['a', 'b'], 'out').update
     bot.channels['out'].must_equal false
-  end  
+  end
+  
+  it 'does nothing if update returns the same values as previous update' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => true, 'b' => true, 'out' => false}
+    obj = Logicbot::Objects::AND.new(bot, [0, 0, 0], ['a', 'b'], 'out')
+    obj.update
+    bot.instance_variable_get(:@channels_marked_for_update).include?('out').must_equal true
+    bot.instance_variable_set :@channels_marked_for_update, []
+    obj.update
+    bot.instance_variable_get(:@channels_marked_for_update).include?('out').must_equal false
+  end
 end
 
 describe Logicbot::Objects::OR do
@@ -89,6 +118,18 @@ describe Logicbot::Objects::OR do
     bot.channels = {'a' => false, 'b' => false, 'out' => false}
     Logicbot::Objects::OR.new(bot, [0, 0, 0], ['a', 'b'], 'out').update
     bot.channels['out'].must_equal false
+  end
+  
+  it 'does nothing if update returns the same values as previous update' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => true, 'b' => false, 'out' => false}
+    obj = Logicbot::Objects::OR.new(bot, [0, 0, 0], ['a', 'b'], 'out')
+    obj.update
+    bot.instance_variable_get(:@channels_marked_for_update).include?('out').must_equal true
+    bot.instance_variable_set :@channels_marked_for_update, []
+    bot.channels = {'a' => false, 'b' => true, 'out' => false}    
+    obj.update
+    bot.instance_variable_get(:@channels_marked_for_update).include?('out').must_equal false
   end  
 end
 
@@ -105,7 +146,18 @@ describe Logicbot::Objects::NOT do
     bot.channels = {'a' => true, 'out' => false}
     Logicbot::Objects::NOT.new(bot, [0, 0, 0], ['a'], 'out').update
     bot.channels['out'].must_equal false
-  end  
+  end
+  
+  it 'does nothing if update returns the same values as previous update' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => true, 'b' => false, 'out' => false}
+    obj = Logicbot::Objects::NOT.new(bot, [0, 0, 0], ['a'], 'out')
+    obj.update
+    bot.instance_variable_get(:@channels_marked_for_update).include?('out').must_equal true
+    bot.instance_variable_set :@channels_marked_for_update, []
+    obj.update
+    bot.instance_variable_get(:@channels_marked_for_update).include?('out').must_equal false
+  end
 end
 
 describe Logicbot::Objects::XOR do
@@ -132,7 +184,19 @@ describe Logicbot::Objects::XOR do
     bot.channels = {'a' => false, 'b' => false, 'out' => false}
     Logicbot::Objects::XOR.new(bot, [0, 0, 0], ['a', 'b'], 'out').update
     bot.channels['out'].must_equal false
-  end  
+  end
+  
+  it 'does nothing if update returns the same values as previous update' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    bot.channels = {'a' => true, 'b' => false, 'out' => false}
+    obj = Logicbot::Objects::XOR.new(bot, [0, 0, 0], ['a', 'b'], 'out')
+    obj.update
+    bot.instance_variable_get(:@channels_marked_for_update).include?('out').must_equal true
+    bot.instance_variable_set :@channels_marked_for_update, []
+    bot.channels = {'a' => false, 'b' => true, 'out' => false}
+    obj.update
+    bot.instance_variable_get(:@channels_marked_for_update).include?('out').must_equal false
+  end   
 end
 
 describe Logicbot::Objects::Indicator do
@@ -151,5 +215,23 @@ describe Logicbot::Objects::Indicator do
     bot.channels['a'] = false
     indicator.update
     bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,34\nB,0,0,0,0\nB,0,0,0,43\n"
+  end
+  
+  it 'does nothing if changing to false after false' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    lamp = Logicbot::Objects::Indicator.new(bot, [0, 0, 0], ['a'], nil)
+    bot.channels = {'a' => false}
+    lamp.update
+    lamp.update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,43\n"
+  end
+  
+  it 'does nothing if changing to 15 after 15' do
+    bot = Logicbot::Bot.new '', '', '', 0
+    lamp = Logicbot::Objects::Indicator.new(bot, [0, 0, 0], ['a'], nil)
+    bot.channels = {'a' => true}
+    lamp.update
+    lamp.update
+    bot.server.instance_variable_get(:@buffer).must_equal "B,0,0,0,0\nB,0,0,0,34\n"
   end
 end

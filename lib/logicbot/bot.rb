@@ -121,7 +121,7 @@ module Logicbot
             @server.set_block *event[:pos], @objects[event[:pos]].metadata
 
             if @objects[event[:pos]].class::NEEDS_UPDATE_AFTER_BREAK then # Update the object if it needs it
-              @objects[event[:pos]].update
+              @objects[event[:pos]].force_update
             end
 
             @objects[event[:pos]].signs.each_with_index do |sign, facing|
