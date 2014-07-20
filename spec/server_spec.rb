@@ -88,6 +88,34 @@ describe Logicbot::Server do
     server.get_event.must_equal({:type => :sign_update, :pos => [1, 1, 1], :facing => 4, :text => 'test,test'})
   end
   
+  it 'can correctly handle a player joining' do
+    server = Logicbot::Server.new '', '', '', 0
+    io = StringIO.new "N,1,test,test\n"
+    server.instance_variable_set :@tcp, io
+    server.get_event.must_equal({:type => :player_join, :id => 1, :name => 'test,test'})
+    server.players[1].must_equal 'test,test'
+  end
+  
+  it 'can correctly handle a player leaving' do
+    server = Logicbot::Server.new '', '', '', 0
+    io = StringIO.new "N,1,test,test\nD,1\n"
+    server.instance_variable_set :@tcp, io
+    server.get_event
+    server.get_event.must_equal({:type => :player_leave, :id => 1, :name => 'test,test'})
+    server.players[1].must_equal nil
+    server.players.length.must_equal 0
+  end
+  
+  it 'can correctly handle itself joining' do
+    server = Logicbot::Server.new '', '', '', 0
+    io = StringIO.new "N,1,guest1\nN,1,test,test\n"
+    server.instance_variable_set :@tcp, io
+    server.get_event.must_equal({:type => :player_join, :id => 1, :name => 'guest1'})
+    server.get_event.must_equal({:type => :player_join, :id => 1, :name => 'test,test'})
+    server.players[1].must_equal 'test,test'
+    server.players.length.must_equal 1
+  end
+  
   it 'can retrieve a block from the server when not in cache' do
     server = Logicbot::Server.new '', '', '', 0
     bidir_io = BidirectionalStringIO.new

@@ -17,7 +17,7 @@
 module Logicbot
   class Server
     attr_accessor :block_cache
-    attr_reader :username
+    attr_reader :username, :players
   
     def initialize username, identity_token, server_name, server_port
       @username = username
@@ -26,6 +26,7 @@ module Logicbot
       @server_name = server_name
       @server_port = server_port
       @block_cache = {}
+      @players = {}
       
       @write_mutex = Mutex.new
       
@@ -68,6 +69,13 @@ module Logicbot
         return {:type => :block_change, :pos => pos, :id => data[6].to_i}
       when 'S'            # Sign change
         return {:type => :sign_update, :pos => [data[3].to_i, data[4].to_i, data[5].to_i], :facing => data[6].to_i, :text => data[7 .. -1].join(',')}
+      when 'N'            # Player join
+        @players[data[1].to_i] = data[2 .. -1].join(',')
+        return {:type => :player_join, :id => data[1].to_i, :name => data[2 .. -1].join(',')}
+      when 'D'            # Player leave
+        event = {:type => :player_leave, :id => data[1].to_i, :name => @players[data[1].to_i]}
+        @players.delete data[1].to_i
+        return event
       else
         return nil
       end

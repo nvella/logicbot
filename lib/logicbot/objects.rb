@@ -19,6 +19,7 @@ module Logicbot
     class Base
       COLOUR = nil # A COLOUR value of nil means no block replace.
       NEEDS_UPDATE_AFTER_BREAK = false # object is updated after break if true
+      ALWAYS_ON = true # if false then object is not updated if no players on
       
       attr_accessor :in_channels, :out_channel, :needs_update, :metadata, :signs
       def initialize bot, pos, in_channels, out_channel, needs_update = false, metadata = 0
@@ -41,6 +42,7 @@ module Logicbot
       ID = 0
       PARAMS = 1
       PARAM_FORMAT = [0, 1]
+      ALWAYS_ON = false
     end
     
     class Lamp < Base
@@ -48,6 +50,7 @@ module Logicbot
       PARAMS = 1
       PARAM_FORMAT = [1, 0]
       NEEDS_UPDATE_AFTER_BREAK = true
+      ALWAYS_ON = false
       
       def update
         if @last_state != @bot.channels[@in_channels[0]] then
@@ -142,6 +145,7 @@ module Logicbot
       PARAMS = 1
       PARAM_FORMAT = [1, 0]
       NEEDS_UPDATE_AFTER_BREAK = true
+      ALWAYS_ON = false
       
       def update
         if @last_state != @bot.channels[@in_channels[0]] then
@@ -168,6 +172,7 @@ module Logicbot
       PARAMS = 1
       PARAM_FORMAT = [1, 0]
       NEEDS_UPDATE_AFTER_BREAK = true
+      ALWAYS_ON = false
       
       def update
         if @last_state != @bot.channels[@in_channels[0]] then

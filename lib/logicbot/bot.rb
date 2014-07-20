@@ -225,15 +225,17 @@ module Logicbot
     def tick_thread
       while true do
         start_time = Time.now
+        players_on = @server.players.length > 1
+        
         @tick_mutex.synchronize do
           buffer = ''
           @objects.each do |pos, obj| # Process each object that needs an update
             if obj.needs_update then
               @channels['t'] = true  # dirty hack here
               @channels['f'] = false # dirty hack there
-            
+
               obj.needs_update = false
-              obj.update
+              if obj.class::ALWAYS_ON or players_on then obj.update end
             end
           end
     
