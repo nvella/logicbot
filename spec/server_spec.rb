@@ -62,6 +62,9 @@ describe Logicbot::Server do
   
   it 'can correctly handle a player chat message' do
     server = Logicbot::Server.new '', '', '', 0
+    io = StringIO.new "T,player> test,test123>a\n"
+    server.instance_variable_set :@tcp, io
+    server.get_event.must_equal({:type => :chat_message, :sender => 'player', :message => 'test,test123>a'})
     io = StringIO.new "T,player> test,test123\n"
     server.instance_variable_set :@tcp, io
     server.get_event.must_equal({:type => :chat_message, :sender => 'player', :message => 'test,test123'})

@@ -58,7 +58,7 @@ module Logicbot
       when 'T'            # Chat message
         message_contents = data[1 .. -1].join(',')
         if message_contents.split('>')[1] != nil then # If message was said by player
-          return {:type => :chat_message, :sender => message_contents.split('>')[0], :message => message_contents.split('>')[1].lstrip}
+          return {:type => :chat_message, :sender => message_contents.split('>')[0], :message => message_contents.split('>')[1 .. -1].join('>').lstrip}
         else
           return {:type => :chat_broadcast, :message => message_contents}
         end
