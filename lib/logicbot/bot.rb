@@ -127,8 +127,8 @@ module Logicbot
             end
 
             @objects[event[:pos]].signs.each_with_index do |sign, facing|
-              if sign.length > 0 then
-                @server.set_sign *event[:pos], facing, sign
+              if sign.to_s.length > 0 then
+                @server.set_sign *event[:pos], facing, sign.to_s
               end
             end
           end
