@@ -60,7 +60,7 @@ module Logicbot
         if message_contents.split('>')[1] != nil then # If message was said by player
           return {:type => :chat_message, :sender => message_contents.split('>')[0], :message => message_contents.split('>')[1 .. -1].join('>').lstrip}
         else
-          return {:type => :chat_broadcast, :message => message_contents}
+          return {:type => :chat_special, :message => message_contents}
         end
       when 'B'            # Block change
         pos = [data[3].to_i, data[4].to_i, data[5].to_i] # Create the position data

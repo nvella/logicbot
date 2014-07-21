@@ -107,6 +107,8 @@ module Logicbot
               end
             end
           end
+        when :chat_special # Chat broadcast
+          Logicbot.log "Special message: #{event[:message]}"
         when :block_change # Block break/place
           # If block change was a break and there was an object at the location
           if event[:id] == 0 and @objects[event[:pos]] != nil then

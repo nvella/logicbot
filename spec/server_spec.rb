@@ -53,11 +53,11 @@ class BidirectionalStringIO
 end
 
 describe Logicbot::Server do
-  it 'can correctly handle a server chat message broadcast' do
+  it 'can correctly handle a server special message' do
     server = Logicbot::Server.new '', '', '', 0
     io = StringIO.new "T,abc,def\n"
     server.instance_variable_set :@tcp, io
-    server.get_event.must_equal({:type => :chat_broadcast, :message => 'abc,def'})
+    server.get_event.must_equal({:type => :chat_special, :message => 'abc,def'})
   end
   
   it 'can correctly handle a player chat message' do
