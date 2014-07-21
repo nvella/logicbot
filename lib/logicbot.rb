@@ -32,6 +32,7 @@ $: << File.dirname(__FILE__)
 require 'net/http'
 require 'socket'
 require 'json'
+require 'set'
 
 require 'logicbot/bot'
 require 'logicbot/objects'

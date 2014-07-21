@@ -30,7 +30,7 @@ module Logicbot
       @buffer = ''
       @channels = {} # [channel_name] = true/false
       @objects  = {} # [[x, y, z]] = obj
-      @channels_marked_for_update = []
+      @channels_marked_for_update = Set.new
       @home = nil
       
       @ticks = 0
@@ -241,13 +241,13 @@ module Logicbot
               if obj.class::ALWAYS_ON or players_on then obj.update end
             end
           end
-    
-          @channels_marked_for_update.each do |channel|      
-            @objects.each do |pos, obj|
-              if obj.in_channels.include? channel then obj.needs_update = true end
+
+          @objects.each do |pos, obj|
+            if (obj.in_channels[0] != nil and @channels_marked_for_update.include? obj.in_channels[0]) or (obj.in_channels[1] != nil and @channels_marked_for_update.include? obj.in_channels[1]) then
+              obj.needs_update = true
             end
           end
-          @channels_marked_for_update = []
+          @channels_marked_for_update = Set.new
 
           @server.flush_buffer
         end
@@ -277,7 +277,7 @@ module Logicbot
     end
     
     def mark_channel_for_update channel
-      @channels_marked_for_update.push channel
+      @channels_marked_for_update.add channel
     end
     
     def toggle_channel channel
