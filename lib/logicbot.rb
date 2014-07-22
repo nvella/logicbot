@@ -21,6 +21,15 @@ module Logicbot
   TICK_DELAY = 0.1
   CHUNK_SIZE = 32
   
+  CLOCK_CHANNELS = {
+    'clock:1s' => (1 / TICK_DELAY).floor,
+    'clock:5s' => (5 / TICK_DELAY).floor,
+    'clock:10s' => (10 / TICK_DELAY).floor,
+    'clock:1m' => (60 / TICK_DELAY)
+  }
+  
+  CLOCK_ON_TIME = 5 # Time, in ticks, that a clock channel remains on for
+  
   def self.log str
     STDOUT.puts "[#{Time.now.to_s}] #{str}"
     STDOUT.flush

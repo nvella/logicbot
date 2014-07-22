@@ -232,13 +232,26 @@ module Logicbot
         
         @tick_mutex.synchronize do
           buffer = ''
+
           @objects.each do |pos, obj| # Process each object that needs an update
             if obj.needs_update then
               @channels['t'] = true  # dirty hack here
               @channels['f'] = false # dirty hack there
 
+              CLOCK_CHANNELS.each do |channel, interval| # /really/ need to add read-only channels
+                @channels[channel] = ((@ticks - 1) % interval) < CLOCK_ON_TIME # @ticks - 1 because the clock update will get sent to us next tick
+              end
+              
               obj.needs_update = false
               if obj.class::ALWAYS_ON or players_on then obj.update end
+            end
+          end
+          
+          CLOCK_CHANNELS.each do |channel, interval|
+            if (@ticks % interval) == 0 then
+              mark_channel_for_update channel
+            elsif (@ticks % interval) == CLOCK_ON_TIME then
+              mark_channel_for_update channel
             end
           end
 
