@@ -29,7 +29,7 @@ module Logicbot
         @out_channel = out_channel
         @needs_update = needs_update
         @metadata = metadata
-        @signs = [''] * 6 # [block_face] = sign_text
+        @signs = [''] * 24 # [block_face] = sign_text
         @last_state = nil
       end
       

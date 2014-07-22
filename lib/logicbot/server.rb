@@ -68,7 +68,7 @@ module Logicbot
         @block_cache[pos] = data[6].to_i
         return {:type => :block_change, :pos => pos, :id => data[6].to_i}
       when 'S'            # Sign change
-        return {:type => :sign_update, :pos => [data[3].to_i, data[4].to_i, data[5].to_i], :facing => data[6].to_i, :text => data[7 .. -1].join(',')}
+        return {:type => :sign_update, :pos => [data[3].to_i, data[4].to_i, data[5].to_i], :facing => data[6].to_i, :text => (data[7 .. -1] or []).join(',')}
       when 'N'            # Player join
         @players[data[1].to_i] = data[2 .. -1].join(',')
         return {:type => :player_join, :id => data[1].to_i, :name => data[2 .. -1].join(',')}
