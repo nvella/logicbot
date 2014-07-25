@@ -201,6 +201,25 @@ module Logicbot
       end
     end
     
+    class NOR
+      ID = 8
+      PARAMS = 3
+      PARAM_FORMAT = [2, 1]
+      COLOUR = 59
+
+      def update
+        if @last_state != !(@bot.channels[@in_channels[0]] or @bot.channels[@in_channels[1]]) then
+          force_update
+        end
+      end
+      
+      def force_update
+        @bot.channels[@out_channel] = !(@bot.channels[@in_channels[0]] or @bot.channels[@in_channels[1]])
+        @bot.mark_channel_for_update @out_channel
+        @last_state = @bot.channels[@out_channel]
+      end
+    end
+    
     TYPES = {
       'toggle' => Toggle,
       'lamp'   => Lamp,
@@ -209,7 +228,8 @@ module Logicbot
       'not'    => NOT,
       'xor'    => XOR,
       'indicator' => Indicator,
-      'door'   => Door
+      'door'   => Door,
+      'nor'    => NOR
     }    
   end
 end  
