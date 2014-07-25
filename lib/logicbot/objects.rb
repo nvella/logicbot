@@ -220,6 +220,25 @@ module Logicbot
       end
     end
     
+    class NAND < Base
+      ID = 9
+      PARAMS = 3
+      PARAM_FORMAT = [2, 1]
+      COLOUR = 32
+      
+      def update
+        if @last_state != !(@bot.channels[@in_channels[0]] and @bot.channels[@in_channels[1]]) then
+          force_update
+        end
+      end
+      
+      def force_update
+        @bot.channels[@out_channel] = !(@bot.channels[@in_channels[0]] and @bot.channels[@in_channels[1]])
+        @bot.mark_channel_for_update @out_channel
+        @last_state = @bot.channels[@out_channel]
+      end
+    end
+    
     TYPES = {
       'toggle' => Toggle,
       'lamp'   => Lamp,
@@ -229,7 +248,8 @@ module Logicbot
       'xor'    => XOR,
       'indicator' => Indicator,
       'door'   => Door,
-      'nor'    => NOR
-    }    
+      'nor'    => NOR,
+      'nand'   => NAND
+    }
   end
 end  
