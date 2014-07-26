@@ -201,7 +201,7 @@ module Logicbot
       end
     end
     
-    class NOR
+    class NOR < Base
       ID = 8
       PARAMS = 3
       PARAM_FORMAT = [2, 1]
