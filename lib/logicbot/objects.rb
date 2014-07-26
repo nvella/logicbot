@@ -52,8 +52,13 @@ module Logicbot
       NEEDS_UPDATE_AFTER_BREAK = true
       ALWAYS_ON = false
       
+      def initialize bot, pos, in_channels, out_channel, needs_update = false, metadata = 0
+        super bot, pos, in_channels, out_channel, needs_update, metadata
+        @last_update = -10
+      end
+      
       def update
-        if @last_state != @bot.channels[@in_channels[0]] then
+        if @last_state != @bot.channels[@in_channels[0]] and @bot.ticks - @last_update > 10 then
           force_update
         end
       end
@@ -61,6 +66,7 @@ module Logicbot
       def force_update
         @bot.server.set_light *@pos, if @bot.channels[@in_channels[0]] then 15 else 0 end
         @last_state = @bot.channels[@in_channels[0]]
+        @last_update = @bot.ticks
       end
     end
     
