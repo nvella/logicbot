@@ -96,7 +96,24 @@ describe Logicbot::Server do
     io = StringIO.new "N,1,test,test\n"
     server.instance_variable_set :@tcp, io
     server.get_event.must_equal({:type => :player_join, :id => 1, :name => 'test,test'})
-    server.players[1].must_equal 'test,test'
+    server.players[1].must_equal({:name => 'test,test', :pos => nil})
+  end
+  
+  it 'can correctly handle a player moving' do
+    server = Logicbot::Server.new '', '', '', 0
+    io = StringIO.new "P,1,1.0,2.0,3.0,4.0,5.0\n"
+    server.instance_variable_set :@tcp, io
+    server.get_event.must_equal({:type => :player_position, :id => 1, :pos => [1.0, 2.0, 3.0, 4.0, 5.0]})
+    server.players[1].must_equal({:name => nil, :pos => [1.0, 2.0, 3.0, 4.0, 5.0]})
+  end
+  
+  it 'can correctly handle a player moving before joining' do
+    server = Logicbot::Server.new '', '', '', 0
+    io = StringIO.new "P,1,1.0,2.0,3.0,4.0,5.0\nN,1,test,test"
+    server.instance_variable_set :@tcp, io
+    server.get_event.must_equal({:type => :player_position, :id => 1, :pos => [1.0, 2.0, 3.0, 4.0, 5.0]})
+    server.get_event.must_equal({:type => :player_join, :id => 1, :name => 'test,test'})
+    server.players[1].must_equal({:name => 'test,test', :pos => [1.0, 2.0, 3.0, 4.0, 5.0]})
   end
   
   it 'can correctly handle a player leaving' do
@@ -115,7 +132,7 @@ describe Logicbot::Server do
     server.instance_variable_set :@tcp, io
     server.get_event.must_equal({:type => :player_join, :id => 1, :name => 'guest1'})
     server.get_event.must_equal({:type => :player_join, :id => 1, :name => 'test,test'})
-    server.players[1].must_equal 'test,test'
+    server.players[1].must_equal({:name => 'test,test', :pos => nil})
     server.players.length.must_equal 1
   end
   
