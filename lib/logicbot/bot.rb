@@ -227,8 +227,6 @@ module Logicbot
     def tick_thread
       while true do
         start_time = Time.now
-        players_on = false
-        @server.players.each {|id, data| if not data[:name].downcase.include? 'bot' then players_on = true; break end}
         
         @tick_mutex.synchronize do
           buffer = ''
@@ -243,7 +241,7 @@ module Logicbot
               end
               
               obj.needs_update = false
-              if obj.class::ALWAYS_ON or players_on then obj.update end
+              if obj.class::ALWAYS_ON or is_object_in_range? pos then obj.update end
             end
           end
           
@@ -335,6 +333,16 @@ module Logicbot
       else
         return channel_name
       end
-    end    
+    end
+    
+    def is_object_in_range? pos
+      @server.players.each do |id, data|
+        if data[:pos] == nil then next end
+        dist_x = Math.abs(pos[0] - data[:pos][0])
+        dist_z = Math.abs(pos[2] - data[:pos][2])
+        if not data[:name].downcase.include? 'bot' and Math.sqrt((dist_x ** 2.0) + (dist_z ** 2.0)) < 256 then return true end
+      end
+      return false
+    end
   end
 end
