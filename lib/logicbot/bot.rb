@@ -228,7 +228,7 @@ module Logicbot
       while true do
         start_time = Time.now
         players_on = false
-        @server.players.each {|id, name| if not name.downcase.include? 'bot' then players_on = true; break end}
+        @server.players.each {|id, data| if not data[:name].downcase.include? 'bot' then players_on = true; break end}
         
         @tick_mutex.synchronize do
           buffer = ''

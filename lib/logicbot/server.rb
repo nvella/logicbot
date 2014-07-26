@@ -70,10 +70,15 @@ module Logicbot
       when 'S'            # Sign change
         return {:type => :sign_update, :pos => [data[3].to_i, data[4].to_i, data[5].to_i], :facing => data[6].to_i, :text => (data[7 .. -1] or []).join(',')}
       when 'N'            # Player join
-        @players[data[1].to_i] = data[2 .. -1].join(',')
+        prepare_player data[1].to_i
+        @players[data[1].to_i][:name] = data[2 .. -1].join(',')
         return {:type => :player_join, :id => data[1].to_i, :name => data[2 .. -1].join(',')}
+      when 'P'            # Player position
+        prepare_player data[1].to_i
+        @players[data[1].to_i][:pos] = data[2 .. -1].map {|i| i.to_f}
+        return {:type => :player_position, :id => data[1].to_i, :pos => @players[data[1].to_i][:pos]}
       when 'D'            # Player leave
-        event = {:type => :player_leave, :id => data[1].to_i, :name => @players[data[1].to_i]}
+        event = {:type => :player_leave, :id => data[1].to_i, :name => @players[data[1].to_i][:name]}
         @players.delete data[1].to_i
         return event
       else
@@ -158,6 +163,13 @@ module Logicbot
     def disconnect
       if @tcp != nil then
         @tcp.close
+      end
+    end
+    
+    private
+    def prepare_player id
+      if @players[id] == nil then
+        @players[id] = {:name => nil, :pos => nil}
       end
     end
   end
