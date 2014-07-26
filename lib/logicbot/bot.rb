@@ -338,8 +338,8 @@ module Logicbot
     def is_object_in_range? pos
       @server.players.dup.each do |id, data|
         if data[:pos] == nil then next end
-        dist_x = Math.abs(pos[0] - data[:pos][0])
-        dist_z = Math.abs(pos[2] - data[:pos][2])
+        dist_x = (pos[0] - data[:pos][0]).abs
+        dist_z = (pos[2] - data[:pos][2]).abs
         if not data[:name].downcase.include? 'bot' and Math.sqrt((dist_x ** 2.0) + (dist_z ** 2.0)) < 256 then return true end
       end
       return false
