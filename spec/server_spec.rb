@@ -1,4 +1,4 @@
-# Copyright 2014 nick (nick@nicko.ml). This file is part of Logicbot.
+# Copyright 2014 nick (nick@nxk.me). This file is part of Logicbot.
 #
 #    Logicbot is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
