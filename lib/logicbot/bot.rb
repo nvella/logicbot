@@ -17,78 +17,83 @@
 module Logicbot
   class Bot
     attr_accessor :tcp, :buffer, :channels, :objects, :ticks, :server
-  
+
     def initialize(username, identity_token, server_name, server_port)
       @username = username
       @server = Server.new(username, identity_token, server_name, server_port)
-      
+
       @tcp = nil
-      
+
       @tick_mutex = Mutex.new
-      
+
       @block_cache = {} # Kept upto date with the block types in the world
       @buffer = ''
       @channels = {} # [channel_name] = true/false
       @objects  = {} # [[x, y, z]] = obj
       @channels_marked_for_update = Set.new
       @home = nil
-      
+
       @ticks = 0
     end
-    
-    def load_from_file filename
+
+    def load_from_file(filename)
       json = JSON.parse(File.read(filename))
 
       # Load channels
       @channels = json['channels']
-      
+
       # Load home (will be nil if it doesn't exist)
       @home = json['home']
 
       # Load objects
       json['objects'].each do |pos, data|
-        pos = pos.split(',').map {|i| i.to_i}
+        pos = pos.split(',').map(&:to_i)
         @objects[pos] = Objects::TYPES[data['type']].new(self, pos, data['in_channels'], data['out_channel'], data['needs_update'], data['metadata'])
-        @objects[pos].signs = data['signs'] if !data['signs'].nil? # Provide backwards compat
+        @objects[pos].signs = data['signs'] unless data['signs'].nil? # Provide backwards compat
       end
     end
-    
-    def save_to_file filename
+
+    def save_to_file(filename)
       data = { 'home' => @home, 'channels' => @channels.dup, 'objects' => {} }
-      
+
       # Save out the objects
       @objects.dup.each do |pos, obj|
-        data['objects'][pos.join(',')] =  { 'type' => obj.class.to_s.split(':')[-1].downcase, 'in_channels' => obj.in_channels, 
+        data['objects'][pos.join(',')] =  { 'type' => obj.class.to_s.split(':')[-1].downcase, 'in_channels' => obj.in_channels,
                                             'out_channel' => obj.out_channel, 'needs_update' => obj.needs_update, 'metadata' => obj.metadata,
                                             'signs' => obj.signs }
       end
-      
+
       File.open filename, 'w' do |file|
         file.write(JSON.pretty_generate(data))
       end
-      
+
       # Done
     end
-    
+
     def run
       Logicbot.log "#{NAME} version #{VERSION} starting..."
-      if File.exists? 'logicbot_state.json'
+      if File.exist? 'logicbot_state.json'
         load_from_file('logicbot_state.json')
         Logicbot.log('Loaded state.')
       end
       @server.connect
-      @tick_thread = Thread.new {tick_thread}
-      Signal.trap('SIGINT') {Logicbot.log 'Quitting...'; @server.disconnect; save_to_file 'logicbot_state.json'; exit}
+      @tick_thread = Thread.new { tick_thread }
+      Signal.trap('SIGINT') do
+        Logicbot.log('Quitting...')
+        @server.disconnect
+        save_to_file('logicbot_state.json')
+        exit
+      end
       # Go home
-      @server.set_position(*@home) if !@home.nil?
+      @server.set_position(*@home) unless @home.nil?
       @server.send_chat_message("#{NAME} version #{VERSION}")
       @server.flush_buffer
-      Logicbot.log("Ready.")
-      
+      Logicbot.log('Ready.')
+
       loop do
         event = @server.get_event
         next if event.nil? # Skip if no event
-        
+
         case event[:type]
         when :chat_message # Chat message
           Logicbot.log("Chat: #{event[:sender]}> #{event[:message]}")
@@ -109,7 +114,7 @@ module Logicbot
           Logicbot.log("Special message: #{event[:message]}")
         when :block_change # Block break/place
           # If block change was a break and there was an object at the location
-          if event[:id] == 0 && @objects[event[:pos]] != nil
+          if event[:id] == 0 && !@objects[event[:pos]].nil?
             if @objects[event[:pos]].class == Objects::Toggle # Take special action if the object was a toggle
               @tick_mutex.synchronize do
                 toggle_channel(@objects[event[:pos]].out_channel)
@@ -131,7 +136,7 @@ module Logicbot
             end
           end
         when :sign_update # Sign
-          if event[:text][0 .. 6] == '[logic]' || event[:text][0 .. 5] == '`logic' # TODO Add config option for these keywords
+          if event[:text][0..6] == '[logic]' || event[:text][0..5] == '`logic' # TODO: Add config option for these keywords
             @server.set_sign(*event[:pos], event[:facing], '')
             sign_data = event[:text].split(' ')
             case sign_data[1]
@@ -146,37 +151,37 @@ module Logicbot
             when 'info' # Player wants info on object
               if !@objects[event[:pos]].nil?
                 @server.send_chat_message("info for object at #{event[:pos].join(' ')}.")
-                @server.send_chat_message("TYPE(#{@objects[event[:pos]].class.to_s.split(':')[-1].downcase}) IN(#{@objects[event[:pos]].in_channels.map {|c| unresolve_channel event[:pos], c}.join(' ').rstrip}) OUT(#{unresolve_channel event[:pos], @objects[event[:pos]].out_channel})")
+                @server.send_chat_message("TYPE(#{@objects[event[:pos]].class.to_s.split(':')[-1].downcase}) IN(#{@objects[event[:pos]].in_channels.map { |c| unresolve_channel event[:pos], c }.join(' ').rstrip}) OUT(#{unresolve_channel event[:pos], @objects[event[:pos]].out_channel})")
               else
                 @server.send_chat_message("error: no object exists at #{event[:pos].join(' ')}.")
               end
             else # Player is placing an object
               if !Objects::TYPES[sign_data[1]].nil? # Check if object type exists
                 # Check the parameters
-                parameters = sign_data[2 .. 4]
+                parameters = sign_data[2..4]
                 if !(parameters.length >= Objects::TYPES[sign_data[1]]::PARAMS || (parameters.length >= (Objects::TYPES[sign_data[1]]::PARAMS - 1) && Objects::TYPES[sign_data[1]]::PARAM_FORMAT[1] > 0))
                   param_format = Objects::TYPES[sign_data[1]]::PARAM_FORMAT
                   @server.send_chat_message("error: object type `#{sign_data[1]}' expects parameters in format #{(('input ' * param_format[0]) + if param_format[1] > 0 then '[output]' else '' end).rstrip}")
                 elsif !@objects[event[:pos]].nil?
                   @server.send_chat_message("error: an object already exists at #{event[:pos].join(' ')}.")
                 else
-                  block_id = if Objects::TYPES[sign_data[1]]::COLOUR != nil then Objects::TYPES[sign_data[1]]::COLOUR else @server.get_block *event[:pos] end
-                  
+                  block_id = if !Objects::TYPES[sign_data[1]]::COLOUR.nil? then Objects::TYPES[sign_data[1]]::COLOUR else @server.get_block(*event[:pos]) end
+
                   if block_id.nil?
-                    @server.send_chat_message("error: internal server error. please try again. (could not retrieve chunk)")
+                    @server.send_chat_message('error: internal server error. please try again. (could not retrieve chunk)')
                   else
-                    parameters = parameters.map {|channel| resolve_channel(event[:pos], channel)}
-                  
+                    parameters = parameters.map { |channel| resolve_channel(event[:pos], channel) }
+
                     @tick_mutex.synchronize do
-                      parameters.each {|channel| prepare_channel(channel)} # Prepare the channels
+                      parameters.each { |channel| prepare_channel(channel) } # Prepare the channels
                     end
-                    
+
                     param_format = Objects::TYPES[sign_data[1]]::PARAM_FORMAT
                     in_channels = []
                     out_channel = nil
-                    
-                    in_channels = parameters[0 .. (param_format[0] - 1)] if param_format[0] > 0
-                    
+
+                    in_channels = parameters[0..(param_format[0] - 1)] if param_format[0] > 0
+
                     if param_format[1] > 0
                       if parameters[param_format[0]].nil?
                         # Create the block output channel
@@ -187,20 +192,20 @@ module Logicbot
                         out_channel = parameters[param_format[0]]
                       end
                     end
-                    
+
                     @tick_mutex.synchronize do
                       @objects[event[:pos]] = Objects::TYPES[sign_data[1]].new(self, event[:pos], in_channels, out_channel, true, block_id)
                     end
-                    
-                    if !Objects::TYPES[sign_data[1]]::COLOUR.nil?
+
+                    unless Objects::TYPES[sign_data[1]]::COLOUR.nil?
                       @server.set_block(*event[:pos], 0) # Break the block
                       @server.set_block(*event[:pos], Objects::TYPES[sign_data[1]]::COLOUR) # Then set it
                     end
-                    
-                    6.times {|i| @server.set_sign(*event[:pos], i, '')} # Clear all the signs on this block so we can keep update with new changes
+
+                    6.times { |i| @server.set_sign(*event[:pos], i, '') } # Clear all the signs on this block so we can keep update with new changes
 
                     # Add description sign
-                    @objects[event[:pos]].signs[event[:facing]] = "#{@objects[event[:pos]].class.to_s.split(':')[-1].downcase} #{@objects[event[:pos]].in_channels.map {|c| unresolve_channel event[:pos], c}.join(' ').rstrip} #{unresolve_channel event[:pos], @objects[event[:pos]].out_channel}"
+                    @objects[event[:pos]].signs[event[:facing]] = "#{@objects[event[:pos]].class.to_s.split(':')[-1].downcase} #{@objects[event[:pos]].in_channels.map { |c| unresolve_channel event[:pos], c }.join(' ').rstrip} #{unresolve_channel event[:pos], @objects[event[:pos]].out_channel}"
                     @server.set_sign(*event[:pos], event[:facing], @objects[event[:pos]].signs[event[:facing]])
 
                     @server.send_chat_message("`#{sign_data[1]}' object created at #{event[:pos].join(' ')}.")
@@ -211,34 +216,32 @@ module Logicbot
               end
             end
           else # Placed a sign with text we might not care about
-            @objects[event[:pos]].signs[event[:facing]] = event[:text] if !@objects[event[:pos]].nil? # We own a block at this location, update the sign data
+            @objects[event[:pos]].signs[event[:facing]] = event[:text] unless @objects[event[:pos]].nil? # We own a block at this location, update the sign data
           end
         end
         @server.flush_buffer
       end
     end
-    
+
     def tick_thread
       loop do
         start_time = Time.now
-        
+
         @tick_mutex.synchronize do
-          buffer = ''
-
           @objects.each do |pos, obj| # Process each object that needs an update
-            if obj.needs_update
-              @channels['t'] = true  # dirty hack here
-              @channels['f'] = false # dirty hack there
+            next unless obj.needs_update
 
-              CLOCK_CHANNELS.each do |channel, interval| # /really/ need to add read-only channels
-                @channels[channel] = ((@ticks - 1) % interval) < CLOCK_ON_TIME # @ticks - 1 because the clock update will get sent to us next tick
-              end
-              
-              obj.needs_update = false
-              obj.update if obj.class::ALWAYS_ON || is_object_in_range?(pos)
+            @channels['t'] = true  # dirty hack here
+            @channels['f'] = false # dirty hack there
+
+            CLOCK_CHANNELS.each do |channel, interval| # /really/ need to add read-only channels
+              @channels[channel] = ((@ticks - 1) % interval) < CLOCK_ON_TIME # @ticks - 1 because the clock update will get sent to us next tick
             end
+
+            obj.needs_update = false
+            obj.update if obj.class::ALWAYS_ON || is_object_in_range?(pos)
           end
-          
+
           CLOCK_CHANNELS.each do |channel, interval|
             if @ticks % interval == 0
               mark_channel_for_update(channel)
@@ -247,7 +250,7 @@ module Logicbot
             end
           end
 
-          @objects.each do |pos, obj|
+          @objects.each do |_, obj|
             if (!obj.in_channels[0].nil? && @channels_marked_for_update.include?(obj.in_channels[0])) || (!obj.in_channels[1].nil? && @channels_marked_for_update.include?(obj.in_channels[1]))
               obj.needs_update = true
             end
@@ -256,40 +259,40 @@ module Logicbot
 
           @server.flush_buffer
         end
-        
+
         total = Time.now - start_time
-        if TICK_DELAY > total then
-          sleep(TICK_DELAY - total) 
+        if TICK_DELAY > total
+          sleep(TICK_DELAY - total)
         else
           Logicbot.log("Tick took too long! #{total}s")
         end
-        
+
         if @ticks > 0 && @ticks % 3000 == 0 # Automatic save, TODO make config option for this
           Thread.new do
-            Logicbot.log "Saving..."
-            save_to_file 'logicbot_state.json'
-            Logicbot.log "Done."
+            Logicbot.log('Saving...')
+            save_to_file('logicbot_state.json')
+            Logicbot.log('Done.')
           end
         end
         @ticks += 1
       end
     end
-    
+
     def prepare_channel(channel)
       @channels[channel] = false if @channels[channel].nil?
     end
-    
+
     def mark_channel_for_update(channel)
       @channels_marked_for_update.add(channel)
     end
-    
+
     def toggle_channel(channel)
       @channels[channel] = !@channels[channel]
     end
-    
+
     def unresolve_channel(pos, channel_name)
-      return channel_name if channel_name == nil || channel_name.split(',').length != 3
-      other_pos = channel_name.split(',').map {|i| i.to_i}
+      return channel_name if channel_name.nil? || channel_name.split(',').length != 3
+      other_pos = channel_name.split(',').map(&:to_i)
       case [other_pos[0] - pos[0], other_pos[1] - pos[1], other_pos[2] - pos[2]]
       when [0, 1, 0]
         return 'u'
@@ -302,12 +305,12 @@ module Logicbot
       when [0, 0, 1]
         return 'e'
       when [0, 0, -1]
-        return 'w'                        
+        return 'w'
       else
         return channel_name
       end
     end
-      
+
     def resolve_channel(pos, channel_name)
       case channel_name.downcase
       when 'u'
@@ -326,13 +329,13 @@ module Logicbot
         return channel_name
       end
     end
-    
+
     def is_object_in_range?(pos)
-      @server.players.dup.each do |id, data|
+      @server.players.dup.each do |_, data|
         next if data[:pos].nil?
         dist_x = (pos[0] - data[:pos][0]).abs
         dist_z = (pos[2] - data[:pos][2]).abs
-        return true if !data[:name].downcase.include? 'bot' && Math.sqrt((dist_x ** 2.0) + (dist_z ** 2.0)) < 256
+        return true if !data[:name].downcase.include?('bot') && Math.sqrt((dist_x**2.0) + (dist_z**2.0)) < 256
       end
       return false
     end

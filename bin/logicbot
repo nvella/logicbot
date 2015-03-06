@@ -17,8 +17,8 @@
 
 require_relative '../lib/logicbot'
 
-if ARGV.length < 4 then
-  STDERR.puts "usage: logicbot USERNAME IDENTITY_TOKEN SERVER_ADDRESS SERVER_PORT"
+if ARGV.length < 4
+  STDERR.puts 'usage: logicbot USERNAME IDENTITY_TOKEN SERVER_ADDRESS SERVER_PORT'
   exit 1
 end
 
